@@ -22,6 +22,8 @@ export const metadata: Metadata = {
     description:
       "Create stunning text behind image designs instantly. Free online tool for text overlay effects.",
     type: "website",
+    siteName: "MagicText",
+    url: "https://magictext.tech",
     images: [
       {
         url: "/pov.png",

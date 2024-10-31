@@ -1,6 +1,7 @@
 import { ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ShimmerButton from "@/components/ui/shimmer-button";
+import Link from "next/link";
 
 const Page = () => {
   return (
@@ -20,12 +21,14 @@ const Page = () => {
               masterpiece.
             </p>
             <div className="flex w-full flex-col justify-center gap-2 sm:flex-row lg:justify-start">
-              <ShimmerButton className="shadow-2xl w-full sm:w-auto">
-                <span className="whitespace-pre-wrap text-center text-sm font-medium leading-none tracking-tight w-full sm:w-auto text-white dark:from-white dark:to-slate-900/10 lg:text-lg flex items-center justify-center">
-                  <ArrowUpRight className="mr-2 size-5" />
-                  Create Your Design
-                </span>
-              </ShimmerButton>
+              <Link href="/editor">
+                <ShimmerButton className="shadow-2xl w-full sm:w-auto">
+                  <span className="whitespace-pre-wrap text-center text-sm font-medium leading-none tracking-tight w-full sm:w-auto text-white dark:from-white dark:to-slate-900/10 lg:text-lg flex items-center justify-center">
+                    <ArrowUpRight className="mr-2 size-5" />
+                    Create Your Design
+                  </span>
+                </ShimmerButton>
+              </Link>
             </div>
           </div>
           <div className="relative aspect-[3/4]">

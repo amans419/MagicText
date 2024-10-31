@@ -23,7 +23,7 @@ const Authenticate = () => {
           access_type: "offline",
           prompt: "consent",
         },
-        redirectTo: "http://localhost:3000/editor",
+        redirectTo: "http://magictext.tech/editor",
       },
     });
 
