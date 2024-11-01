@@ -1,9 +1,6 @@
-"use client";
-
 import { useState, useRef, useEffect } from "react";
 import { motion, useAnimation } from "framer-motion";
 import Image from "next/image";
-import { loadCustomFonts } from "@/utils/loadFonts";
 
 interface Props {
   originalImage: string;
@@ -20,73 +17,104 @@ interface Props {
     fontFamily: string;
     opacity: number;
   }>;
-  // canvasBaseWidth: number;
 }
 
 export default function ImageRender({
   originalImage,
   removedBgImage,
   textSets,
-  // canvasBaseWidth,
 }: Props) {
   const [scale, setScale] = useState(1);
   const [isDragging, setIsDragging] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [initialDistance, setInitialDistance] = useState<number | null>(null);
+  const [initialScale, setInitialScale] = useState<number>(1);
+  const [imageLoaded, setImageLoaded] = useState(false);
   const constraintsRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
   const controls = useAnimation();
-  // const [fontsLoaded, setFontsLoaded] = useState(false);
+  const isZooming = useRef(false);
+  const zoomTimeout = useRef<NodeJS.Timeout>();
+  const lastZoomTime = useRef<number>(Date.now());
+
+  const resetZoomState = () => {
+    isZooming.current = false;
+    if (zoomTimeout.current) {
+      clearTimeout(zoomTimeout.current);
+      zoomTimeout.current = undefined;
+    }
+  };
 
   const handleWheel = (e: React.WheelEvent) => {
     if (e.ctrlKey) {
       e.preventDefault();
-      const newScale = scale - e.deltaY * 0.01;
-      setScale(Math.min(Math.max(0.5, newScale), 3));
+      lastZoomTime.current = Date.now();
+      isZooming.current = true;
+
+      const newScale = scale - e.deltaY * 0.005;
+      const clampedScale = Math.min(Math.max(0.5, newScale), 3);
+      setScale(clampedScale);
+
+      resetZoomState();
+
+      zoomTimeout.current = setTimeout(() => {
+        const timeSinceLastZoom = Date.now() - lastZoomTime.current;
+        if (timeSinceLastZoom >= 150) {
+          isZooming.current = false;
+        }
+      }, 150);
     }
   };
 
-  useEffect(() => {
-    const preventDefault = (e: TouchEvent) => {
-      if (e.touches.length > 1) {
-        e.preventDefault();
-      }
-    };
-    document.addEventListener("touchmove", preventDefault, { passive: false });
-    return () => document.removeEventListener("touchmove", preventDefault);
-  }, []);
+  const getDistance = (touches: React.TouchList): number => {
+    if (touches.length < 2) return 0;
+    const touch1 = touches[0];
+    const touch2 = touches[1];
+    return Math.hypot(
+      touch2.clientX - touch1.clientX,
+      touch2.clientY - touch1.clientY
+    );
+  };
 
-  // useEffect(() => {
-  //   const loadFonts = async () => {
-  //     await loadCustomFonts();
-  //     setFontsLoaded(true);
-  //   };
-  //   loadFonts();
-  // }, []);
-
-  const handlePinch = (e: React.TouchEvent) => {
+  const handleTouchStart = (e: React.TouchEvent) => {
     if (e.touches.length === 2) {
-      const touch1 = e.touches[0];
-      const touch2 = e.touches[1];
-      const distance = Math.hypot(
-        touch1.clientX - touch2.clientX,
-        touch1.clientY - touch2.clientY
-      );
+      e.preventDefault();
+      lastZoomTime.current = Date.now();
+      isZooming.current = true;
+      const distance = getDistance(e.touches);
+      setInitialDistance(distance);
+      setInitialScale(scale);
+    }
+  };
 
-      if (!isDragging) {
-        setIsDragging(true);
-      } else {
-        const newScale = scale + (distance - scale) * 0.01;
-        setScale(Math.min(Math.max(0.5, newScale), 3));
-      }
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (e.touches.length === 2 && initialDistance !== null) {
+      e.preventDefault();
+      lastZoomTime.current = Date.now();
+      const currentDistance = getDistance(e.touches);
+      const scaleDiff = (currentDistance - initialDistance) * 0.005;
+      const newScale = Math.min(Math.max(0.5, initialScale + scaleDiff), 3);
+      setScale(newScale);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    setInitialDistance(null);
+    setInitialScale(scale);
+
+    const timeSinceLastZoom = Date.now() - lastZoomTime.current;
+    if (timeSinceLastZoom >= 150) {
+      resetZoomState();
+    } else {
+      setTimeout(resetZoomState, 150 - timeSinceLastZoom);
     }
   };
 
   const handlePan = (e: any, info: any) => {
-    if (scale > 1) {
+    if (scale > 1 && !isZooming.current) {
       const newX = position.x + info.delta.x;
       const newY = position.y + info.delta.y;
 
-      // Calculate boundaries
       const imageWidth = imageRef.current?.offsetWidth || 0;
       const imageHeight = imageRef.current?.offsetHeight || 0;
       const containerWidth = constraintsRef.current?.offsetWidth || 0;
@@ -102,23 +130,33 @@ export default function ImageRender({
     }
   };
 
+  const handleImageLoad = () => {
+    setImageLoaded(true);
+    // Reset position and scale when a new image is loaded
+    setPosition({ x: 0, y: 0 });
+    setScale(1);
+  };
+
   useEffect(() => {
     controls.start({ scale, x: position.x, y: position.y });
   }, [scale, position, controls]);
 
-  // Add these constants
-  // const calculatePreviewFontSize = (fontSize: number) => {
-  //   const BASE_MULTIPLIER = 3;
-  //   return `${fontSize * BASE_MULTIPLIER * 0.1}vw`; // 0.1 to convert percentage to vw
-  // };
+  useEffect(() => {
+    return () => {
+      resetZoomState();
+    };
+  }, []);
 
-  // if (!fontsLoaded) {
-  //   return <div>Loading fonts...</div>;
-  // }
+  // Reset image state when originalImage changes
+  useEffect(() => {
+    setImageLoaded(false);
+    setPosition({ x: 0, y: 0 });
+    setScale(1);
+  }, [originalImage]);
 
   return (
     <div
-      className="w-full h-screen overflow-hidden flex items-center justify-center bg-gray-100"
+      className="w-full h-[calc(100vh-4rem)] overflow-hidden flex items-center justify-center bg-gray-100"
       style={{
         backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)",
         backgroundSize: "20px 20px",
@@ -127,10 +165,10 @@ export default function ImageRender({
     >
       <div
         ref={constraintsRef}
-        className="w-full h-full relative overflow-hidden"
+        className="w-full h-full relative overflow-hidden flex items-center justify-center"
       >
         <motion.div
-          drag
+          drag={!isZooming.current}
           dragConstraints={constraintsRef}
           dragElastic={0.1}
           dragMomentum={false}
@@ -138,31 +176,42 @@ export default function ImageRender({
           onDragEnd={() => setIsDragging(false)}
           animate={controls}
           onPan={handlePan}
-          onTouchMove={handlePinch}
-          onTouchEnd={() => setIsDragging(false)}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          className="relative flex items-center justify-center"
           style={{
-            width: "100%",
-            height: "100%",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
+            width: imageLoaded ? "auto" : "100%",
+            height: imageLoaded ? "auto" : "100%",
+            touchAction: "none",
           }}
         >
-          <div style={{ position: "relative", width: "100%", height: "100%" }}>
+          <div
+            className="relative"
+            style={{ maxWidth: "100%", maxHeight: "100vh" }}
+          >
             <Image
               ref={imageRef}
               src={originalImage}
               alt="Original"
-              layout="fill"
-              objectFit="contain"
-              objectPosition="center"
-              className="max-w-full max-h-full"
-              style={{ pointerEvents: "none" }}
+              onLoad={handleImageLoad}
+              width={800}
+              height={600}
+              style={{
+                maxWidth: "100%",
+                maxHeight: "90vh",
+                width: "auto",
+                height: "auto",
+                objectFit: "contain",
+                pointerEvents: "none",
+              }}
+              draggable={false}
+              priority
             />
             {textSets.map((textSet) => (
               <div
                 key={textSet.id}
-                className={`text-with-stroke ${textSet.fontFamily.toLocaleLowerCase()}`}
+                className={`text-with-stroke ${textSet.fontFamily.toLowerCase()}`}
                 style={{
                   position: "absolute",
                   top: `${50 - textSet.top}%`,
@@ -170,24 +219,35 @@ export default function ImageRender({
                   transform: `translate(-50%, -50%) rotate(${textSet.rotation}deg)`,
                   color: textSet.color,
                   textAlign: "center",
-                  fontSize: `${textSet.fontSize}vw`, // Change px to vw
+                  fontSize: `${textSet.fontSize}vw`,
                   fontWeight: textSet.fontWeight,
                   fontFamily: textSet.fontFamily,
                   opacity: textSet.opacity,
+                  pointerEvents: "none",
                 }}
               >
                 {textSet.text}
               </div>
             ))}
-            {removedBgImage && (
+            {removedBgImage && imageLoaded && (
               <Image
                 src={removedBgImage}
                 alt="Removed background"
-                layout="fill"
-                objectFit="contain"
-                objectPosition="center"
-                className="max-w-full max-h-full"
-                style={{ pointerEvents: "none" }}
+                width={800}
+                height={600}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  maxWidth: "100%",
+                  maxHeight: "90vh",
+                  width: "auto",
+                  height: "auto",
+                  objectFit: "contain",
+                  pointerEvents: "none",
+                }}
+                draggable={false}
+                priority
               />
             )}
           </div>

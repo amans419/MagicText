@@ -61,24 +61,21 @@ export default function Toolbar({
 }: ToolbarProps) {
   const [selectedTool, setSelectedTool] = useState<string | null>(null);
   const [selectedTextId, setSelectedTextId] = useState<number | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [startX, setStartX] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
-  const toolbarRef = useRef<HTMLDivElement>(null);
-  const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
   const [newText, setNewText] = useState("");
   const [validationMessage, setValidationMessage] = useState<string>("");
-  const [strokeWidth, setStrokeWidth] = useState(1);
-  const [strokeColor, setStrokeColor] = useState("#000000");
+  const [currentFont, setCurrentFont] = useState<string>("Inter");
+  const toolbarRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
-  const [currentFont, setCurrentFont] = useState<string>("Inter"); // Add this line
+  const [isScrolling, setIsScrolling] = useState(false);
+  const scrollTimeout = useRef<NodeJS.Timeout>();
+  const lastScrollTime = useRef<number>(0);
+  const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
 
   const handleAttributeChange = (id: number, attribute: string, value: any) => {
     setTextSets((prev) =>
       prev.map((set) => {
         if (set.id === id) {
           const updatedSet = { ...set, [attribute]: value };
-          // If changing font family, update the currentFont state as well
           if (attribute === "fontFamily") {
             setCurrentFont(value);
           }
@@ -89,34 +86,13 @@ export default function Toolbar({
     );
   };
 
-  const handleStrokeWidthChange = (width: number) => {
-    setStrokeWidth(width);
-    // If you need to update all text sets with the new stroke width
-    setTextSets((prevTextSets) =>
-      prevTextSets.map((textSet) => ({
-        ...textSet,
-        strokeWidth: width,
-      }))
-    );
-  };
-
-  const handleStrokeColorChange = (color: string) => {
-    setStrokeColor(color);
-    // If you need to update all text sets with the new stroke color
-    setTextSets((prevTextSets) =>
-      prevTextSets.map((textSet) => ({
-        ...textSet,
-        strokeColor: color,
-      }))
-    );
-  };
   const addNewTextSet = (text: string) => {
     const newId = Math.max(...textSets.map((set) => set.id), 0) + 1;
     setTextSets((prev) => [
       ...prev,
       {
         id: newId,
-        text: text, // Use the text parameter here
+        text: text,
         fontFamily: "Inter",
         top: 0,
         left: 0,
@@ -161,6 +137,53 @@ export default function Toolbar({
     );
   };
 
+  const handleScroll = () => {
+    const now = Date.now();
+    lastScrollTime.current = now;
+    setIsScrolling(true);
+
+    if (scrollTimeout.current) {
+      clearTimeout(scrollTimeout.current);
+    }
+
+    scrollTimeout.current = setTimeout(() => {
+      const timeSinceLastScroll = Date.now() - lastScrollTime.current;
+      if (timeSinceLastScroll >= 150) {
+        setIsScrolling(false);
+      }
+    }, 150);
+  };
+
+  const handleToolClick = (toolName: string) => {
+    if (isScrolling) {
+      return;
+    }
+
+    if (textSets.length === 0 && toolName !== "Add Text") {
+      toast({
+        variant: "destructive",
+        title: "Add at least one text first",
+        description: "You need to add text before using other tools",
+      });
+      return;
+    }
+    setSelectedTool(toolName);
+    onToolSelect(toolName);
+  };
+
+  const handleBackClick = () => {
+    setSelectedTool(null);
+    setValidationMessage("");
+  };
+
+  useEffect(() => {
+    return () => {
+      if (scrollTimeout.current) {
+        clearTimeout(scrollTimeout.current);
+      }
+    };
+  }, []);
+
   const handleAddNewText = () => {
     if (newText.trim() === "") {
       setValidationMessage("Please enter at least 1 character.");
@@ -171,6 +194,16 @@ export default function Toolbar({
       setValidationMessage(""); // Clear validation message
     }
   };
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsDesktop(window.innerWidth >= 1024);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const tools: Tool[] = [
     {
       name: "Layers",
@@ -244,8 +277,9 @@ export default function Toolbar({
           {selectedTextId !== null && (
             <div className="space-y-2">
               <span>
-                Font Size:{" "}
+                Font Size:
                 {textSets.find((set) => set.id === selectedTextId)?.fontSize}
+                vw
               </span>
               <Slider
                 value={[
@@ -309,7 +343,7 @@ export default function Toolbar({
           {selectedTextId !== null && (
             <div className="space-y-2">
               <span>
-                Font Size:{" "}
+                Font Weight:{" "}
                 {textSets.find((set) => set.id === selectedTextId)?.fontWeight}
               </span>
               <Slider
@@ -364,142 +398,32 @@ export default function Toolbar({
     // ... (other tools)
   ];
 
-  const handleToolClick = (toolName: string) => {
-    if (textSets.length === 0 && toolName !== "Add Text") {
-      toast({
-        variant: "destructive",
-        title: "Uh oh! Add atleast one text.",
-        description: "if you want to decorate than atleat one text :)",
-        // action: <ToastAction altText="Try again">Try again</ToastAction>,
-      });
-    }
-    if (!isDragging) {
-      if (toolName === "Remove Text" && selectedTextId !== null) {
-        removeTextSet(selectedTextId);
-        const remainingTextSets = textSets.filter(
-          (set) => set.id !== selectedTextId
-        );
-        if (remainingTextSets.length > 0) {
-          setSelectedTextId(remainingTextSets[0].id);
-        } else {
-          setSelectedTextId(null);
-        }
-      } else {
-        setSelectedTool(toolName);
-        onToolSelect(toolName);
-      }
-    }
-  };
-
-  const handleBackClick = () => {
-    setSelectedTool(null);
-    setValidationMessage(""); // Clear validation message when going back to tools
-  };
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    setIsDragging(true);
-    setStartX(e.pageX - (toolbarRef.current?.offsetLeft || 0));
-    setScrollLeft(toolbarRef.current?.scrollLeft || 0);
-  };
-
-  const handleMouseLeave = () => {
-    setIsDragging(false);
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging) return;
-    e.preventDefault();
-    const x = e.pageX - (toolbarRef.current?.offsetLeft || 0);
-    const walk = (x - startX) * 2;
-    if (toolbarRef.current) {
-      toolbarRef.current.scrollLeft = scrollLeft - walk;
-    }
-  };
-
-  useEffect(() => {
-    const handleTouchStart = (e: TouchEvent) => {
-      setIsDragging(true);
-      setStartX(e.touches[0].pageX - (toolbarRef.current?.offsetLeft || 0));
-      setScrollLeft(toolbarRef.current?.scrollLeft || 0);
-    };
-
-    const handleTouchMove = (e: TouchEvent) => {
-      if (!isDragging) return;
-      const x = e.touches[0].pageX - (toolbarRef.current?.offsetLeft || 0);
-      const walk = (x - startX) * 2;
-      if (toolbarRef.current) {
-        toolbarRef.current.scrollLeft = scrollLeft - walk;
-      }
-    };
-
-    const handleTouchEnd = () => {
-      setIsDragging(false);
-    };
-
-    const toolbar = toolbarRef.current;
-    if (toolbar) {
-      toolbar.addEventListener("touchstart", handleTouchStart);
-      toolbar.addEventListener("touchmove", handleTouchMove);
-      toolbar.addEventListener("touchend", handleTouchEnd);
-    }
-
-    return () => {
-      if (toolbar) {
-        toolbar.removeEventListener("touchstart", handleTouchStart);
-        toolbar.removeEventListener("touchmove", handleTouchMove);
-        toolbar.removeEventListener("touchend", handleTouchEnd);
-      }
-    };
-  }, [isDragging, startX, scrollLeft]);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsDesktop(window.innerWidth >= 1024);
-    };
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
   return (
-    <div
-      className="fixed bottom-0 left-0 right-0 mb-4 mx-4 "
-      style={isDesktop ? { left: "50%", transform: "translateX(-50%)" } : {}}
-    >
-      <div className="bg-background border rounded-lg shadow-sm overflow-hidden h-24 ">
+    <div className="fixed bottom-0 left-0 right-0 mb-4 mx-4 z-50  flex items-center justify-center">
+      <div className="bg-background border rounded-lg shadow-sm overflow-hidden h-24 w-fit max-md:w-full">
         {selectedTool ? (
-          <div className="px-4 py-2 h-full overflow-y-auto custom-scrollbar">
+          <div className="px-4 py-2 h-full overflow-y-auto">
             <Button
               variant="ghost"
               onClick={handleBackClick}
-              className="p-1 mb-1 underline "
+              className="p-1 mb-1"
+              disabled={isScrolling}
             >
               <ChevronLeft className="h-4 w-4 mr-2" />
-              Go Back
+              Back
             </Button>
-            {/* <h2 className="text-lg font-semibold mb-4">
-              {selectedTool} Settings
-            </h2> */}
             {validationMessage && (
               <div className="text-red-500 text-sm mt-2">
                 {validationMessage}
               </div>
             )}
-
             {tools.find((tool) => tool.name === selectedTool)?.settings}
           </div>
         ) : (
           <div
             ref={toolbarRef}
-            className="flex space-x-2 py-4 overflow-x-auto custom-scrollbar h-full"
-            onMouseDown={handleMouseDown}
-            onMouseLeave={handleMouseLeave}
-            onMouseUp={handleMouseUp}
-            onMouseMove={handleMouseMove}
+            className="flex space-x-2 py-4 overflow-x-auto h-full px-4 scroll-smooth"
+            onScroll={handleScroll}
           >
             {tools.map((tool) => (
               <Button
@@ -507,6 +431,7 @@ export default function Toolbar({
                 variant="ghost"
                 className="flex-shrink-0 flex flex-col items-center justify-center h-full w-20"
                 onClick={() => handleToolClick(tool.name)}
+                disabled={isScrolling}
               >
                 {tool.icon}
                 <span className="text-xs mt-1">{tool.name}</span>

@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   description:
     "Create stunning text behind image designs in seconds. Free online tool to make text overlay effects, photo text designs, and text-behind-image compositions. No design skills needed.",
   keywords:
-    "text behind image, text overlay design, photo text effects, text behind photo editor, image text overlay tool, text layer design",
+    "text behind image, text behind image maker, text behind image generator, text behind photo editor, image text overlay, text overlay maker, text overlay generator, photo text effects, text effect maker, text behind picture, text overlay design tool, free text behind image, online text behind image, image text design, text background remover, text overlay online, text behind image online editor, free text overlay maker, text behind image effects, image text layer editor, text image editor, photo text overlay, text behind photo maker, free text effects, online text editor with images, text overlay app, image text generator, text behind photo online, text overlay photo editor, text behind image free tool",
   openGraph: {
     title: "MagicText - Create Text Behind Image Effects Online",
     description:
