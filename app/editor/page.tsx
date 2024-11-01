@@ -184,13 +184,13 @@ const EditorPage: React.FC = () => {
           Magic Text ✨
         </h2>
         <div className="flex gap-4 items-center">
-          {/* <input
+          <input
             type="file"
             ref={fileInputRef}
             style={{ display: "none" }}
             onChange={handleFileChange}
             accept=".jpg, .jpeg, .png"
-          /> */}
+          />
 
           <Avatar>
             <AvatarImage src={user?.user_metadata.avatar_url} />
