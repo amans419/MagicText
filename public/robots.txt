@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://magictext.tech
+
+# Sitemaps
+Sitemap: https://magictext.tech/sitemap.xml

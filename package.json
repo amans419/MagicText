@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "postbuild": "next-sitemap"
   },
   "dependencies": {
     "@imgly/background-removal": "^1.5.5",
@@ -39,6 +40,7 @@
     "lucide-react": "^0.439.0",
     "mini-svg-data-uri": "^1.4.4",
     "next": "14.2.8",
+    "next-sitemap": "^4.2.3",
     "prettier": "^3.3.3",
     "random-word-slugs": "^0.1.7",
     "react": "^18",
