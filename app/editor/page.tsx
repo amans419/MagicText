@@ -274,7 +274,7 @@ const EditorPage: React.FC = () => {
 
             <Button
               onClick={saveCompositeImage}
-              disabled={!isImageSetupDone || isLoading}
+              disabled={!isImageSetupDone}
               className="flex items-center"
             >
               <Save className="mr-2 h-4 w-4" />
