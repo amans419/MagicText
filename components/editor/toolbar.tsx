@@ -30,12 +30,11 @@ import {
   RotateCw,
 } from "lucide-react";
 import InputField from "./input-field";
-import ColorPicker from "./color-picker";
 import Position from "./position";
 // import StrokeSettings from "./stroke-setting";
 import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "../ui/toast";
-
+import { ColorPicker } from "./color-picker";
 type Tool = {
   name: string;
   icon: React.ReactNode;
@@ -96,8 +95,8 @@ export default function Toolbar({
         fontFamily: "Inter",
         top: 0,
         left: 0,
-        color: "white",
-        fontSize: 26,
+        color: "black",
+        fontSize: isDesktop ? 18 : 26,
         fontWeight: 400,
         opacity: 1,
         rotation: 0,
@@ -107,10 +106,16 @@ export default function Toolbar({
   };
 
   const removeTextSet = (id: number) => {
-    setTextSets((prev) => prev.filter((set) => set.id !== id));
-    if (selectedTextId === id) {
-      setSelectedTextId(null);
-    }
+    setTextSets((prev) => {
+      const updatedSets = prev.filter((set) => set.id !== id);
+      if (selectedTextId === id) {
+        const nextSet =
+          updatedSets.find((set) => set.id > id) ||
+          updatedSets[updatedSets.length - 1];
+        setSelectedTextId(nextSet ? nextSet.id : null);
+      }
+      return updatedSets;
+    });
   };
 
   const handleMove = (
@@ -237,6 +242,7 @@ export default function Toolbar({
         </div>
       ),
     },
+
     {
       name: "Color",
       icon: <Palette className="h-4 w-4" />,
@@ -244,19 +250,18 @@ export default function Toolbar({
         <div className="space-y-4">
           {selectedTextId !== null && (
             <ColorPicker
-              attribute="color"
-              label="Text Color"
-              currentColor={
+              color={
                 textSets.find((set) => set.id === selectedTextId)?.color || ""
               }
-              handleAttributeChange={(attribute, value) =>
-                handleAttributeChange(selectedTextId, attribute, value)
+              onChange={(color) =>
+                handleAttributeChange(selectedTextId, "color", color)
               }
             />
           )}
         </div>
       ),
     },
+
     // {
     //   name: "Stroke",
     //   icon: <Edit className="h-4 w-4" />, // Use an appropriate icon
@@ -270,7 +275,7 @@ export default function Toolbar({
     //   ),
     // },
     {
-      name: "Size",
+      name: "Font Size",
       icon: <Edit className="h-4 w-4" />,
       settings: (
         <div className="space-y-4">
@@ -399,10 +404,10 @@ export default function Toolbar({
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 mb-4 mx-4 z-50  flex items-center justify-center">
-      <div className="bg-background border rounded-lg shadow-sm overflow-hidden h-24 w-fit max-md:w-full">
+    <div className="fixed bottom-0 left-0 right-0 mb-4 mx-4 z-50 flex items-center justify-center">
+      <div className="bg-background border rounded-lg shadow-sm overflow-hidden h-24   overflow-y-auto w-auto max-md:w-full">
         {selectedTool ? (
-          <div className="px-4 py-2 h-full overflow-y-auto">
+          <div className="px-4   py-2 h-full overflow-y-auto lg:w-[calc(100vw-40rem)]">
             <Button
               variant="ghost"
               onClick={handleBackClick}
@@ -422,7 +427,7 @@ export default function Toolbar({
         ) : (
           <div
             ref={toolbarRef}
-            className="flex space-x-2 py-4 overflow-x-auto h-full px-4 scroll-smooth"
+            className="flex space-x-2 py-4 overflow-x-auto h-full px-4 scroll-smooth "
             onScroll={handleScroll}
           >
             {tools.map((tool) => (

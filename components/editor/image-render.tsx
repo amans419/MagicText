@@ -158,7 +158,8 @@ export default function ImageRender({
     <div
       className="w-full h-[calc(100vh-4rem)] overflow-hidden flex items-center justify-center bg-gray-100"
       style={{
-        backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)",
+        backgroundImage:
+          "radial-gradient(circle, #838383e9 1px, transparent 1px)",
         backgroundSize: "20px 20px",
       }}
       onWheel={handleWheel}
