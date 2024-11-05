@@ -152,7 +152,7 @@ const EditorPage: React.FC = () => {
       if (!canvasRef.current) return;
       const dataUrl = canvas.toDataURL("image/png");
       const link = document.createElement("a");
-      link.download = "text-behind-image.png";
+      link.download = "magictext.png";
       link.href = dataUrl;
       link.click();
     }
