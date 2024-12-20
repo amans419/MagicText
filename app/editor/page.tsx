@@ -1,46 +1,48 @@
 "use client";
 
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useCallback } from "react";
 import { useUser } from "@/hooks/useUser";
 import { useSessionContext } from "@supabase/auth-helpers-react";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import Authenticate from "@/components/authenticate";
 import { Button } from "@/components/ui/button";
-import { removeBackground } from "@imgly/background-removal";
 import { ReloadIcon } from "@radix-ui/react-icons";
-import ImageRender from "@/components/editor/image-render";
-import Toolbar from "@/components/editor/toolbar";
 import { Progress } from "@/components/ui/progress";
-import { Upload, Save, BadgePlus } from "lucide-react";
+import { BadgePlus } from 'lucide-react';
+import { useFabric } from "@/hooks/use-fabric";
+import { Toolbar } from "@/components/toolbar"
+import ImageRender from "@/components/image-render"
 
-const loadingMessages = [
-  { threshold: 0, message: "Processing image..." },
-  { threshold: 20, message: "Removing background..." },
-  { threshold: 40, message: "Adjusting effects..." },
-  { threshold: 60, message: "Almost there..." },
-  { threshold: 80, message: "Finalizing your design..." },
-];
+import "@/app/fonts.css"
 
 const EditorPage: React.FC = () => {
   const { user } = useUser();
   const { session } = useSessionContext();
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [isImageSetupDone, setIsImageSetupDone] = useState<boolean>(false);
-  const [removedBgImageUrl, setRemovedBgImageUrl] = useState<string | null>(
-    null
-  );
-  const [selectedTool, setSelectedTool] = useState<string | null>(null);
-  const [textSets, setTextSets] = useState<Array<any>>([]);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [canvasBaseWidth, setCanvasBaseWidth] = useState<number>(0);
-  const [currentMessage, setCurrentMessage] = useState(
-    loadingMessages[0].message
-  );
-
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const {
+    handleImageUpload,
+    canvasRef,
+    isLoading,
+    uploadProgress,
+    currentMessage,
+    canvasReady,
+    setBackgroundImage,
+    addText,
+    changeFontFamily,
+    changeTextColor,
+    flipImage,
+    deleteSelectedObject,
+    downloadCanvas,
+    changeBackgroundColor,
+    currentBackgroundColor,
+    selectedTextProperties,
+    toggleFilter,
+    isImageSelected,
+    toggleDrawingMode,
+    incrementBrushSize,
+    setBrushColor,
+    drawingSettings,
+  } = useFabric();
 
   const handleUploadImage = () => {
     if (fileInputRef.current) {
@@ -48,134 +50,12 @@ const EditorPage: React.FC = () => {
     }
   };
 
-  const handleFileChange = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const onFileChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      try {
-        setIsLoading(true);
-        setUploadProgress(0);
-        setSelectedImage(null);
-        setRemovedBgImageUrl(null);
-        setTextSets([]);
-
-        const progressInterval = setInterval(() => {
-          setUploadProgress((prev) => {
-            if (prev >= 90) {
-              clearInterval(progressInterval);
-              return 90;
-            }
-            return prev + 10;
-          });
-        }, 200);
-
-        const imageUrl = URL.createObjectURL(file);
-        await setupImage(imageUrl);
-        setSelectedImage(imageUrl);
-
-        clearInterval(progressInterval);
-        setUploadProgress(100);
-      } catch (error) {
-        console.error("Error uploading image:", error);
-      } finally {
-        setIsLoading(false);
-      }
+      handleImageUpload(file);
     }
-  };
-
-  const setupImage = async (imageUrl: string) => {
-    try {
-      const imageBlob = await removeBackground(imageUrl);
-      const url = URL.createObjectURL(imageBlob);
-      setRemovedBgImageUrl(url);
-      setIsImageSetupDone(true);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const handleToolSelect = (toolName: string) => {
-    setSelectedTool(toolName);
-  };
-
-  const saveCompositeImage = async () => {
-    if (!canvasRef.current || !isImageSetupDone) return;
-
-    await document.fonts.ready;
-
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    const bgImg = new Image();
-    bgImg.crossOrigin = "anonymous";
-    bgImg.onload = () => {
-      canvas.width = bgImg.width;
-      canvas.height = bgImg.height;
-
-      ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
-
-      textSets.forEach((textSet) => {
-        ctx.save();
-        const fontSize = vwToCanvasPixels(textSet.fontSize, ctx.canvas.width);
-        ctx.font = `${textSet.fontWeight} ${fontSize}px ${textSet.fontFamily}`;
-        ctx.fillStyle = textSet.color;
-        ctx.globalAlpha = textSet.opacity;
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-
-        const x = (canvas.width * (textSet.left + 50)) / 100;
-        const y = (canvas.height * (50 - textSet.top)) / 100;
-
-        ctx.translate(x, y);
-        ctx.rotate((textSet.rotation * Math.PI) / 180);
-        ctx.fillText(textSet.text, 0, 0);
-        ctx.restore();
-      });
-
-      if (removedBgImageUrl) {
-        const removedBgImg = new Image();
-        removedBgImg.crossOrigin = "anonymous";
-        removedBgImg.onload = () => {
-          ctx.drawImage(removedBgImg, 0, 0, canvas.width, canvas.height);
-          triggerDownload();
-        };
-        removedBgImg.src = removedBgImageUrl;
-      } else {
-        triggerDownload();
-      }
-    };
-    bgImg.src = selectedImage || "";
-
-    function triggerDownload() {
-      if (!canvasRef.current) return;
-      const dataUrl = canvas.toDataURL("image/png");
-      const link = document.createElement("a");
-      link.download = "magictext.png";
-      link.href = dataUrl;
-      link.click();
-    }
-  };
-
-  const vwToCanvasPixels = (vw: number, canvasWidth: number) => {
-    const scaleFactor = 1.2;
-    return (vw / 100) * canvasWidth * scaleFactor;
-  };
-
-  useEffect(() => {
-    const currentMessageObj = loadingMessages
-      .reverse()
-      .find((msg) => uploadProgress >= msg.threshold);
-
-    if (currentMessageObj) {
-      setCurrentMessage(currentMessageObj.message);
-    }
-  }, [uploadProgress]);
-
-  if (!user || !session || !session.user) {
-    return <Authenticate />;
-  }
+  }, [handleImageUpload]);
 
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)]">
@@ -188,103 +68,77 @@ const EditorPage: React.FC = () => {
             type="file"
             ref={fileInputRef}
             style={{ display: "none" }}
-            onChange={handleFileChange}
+            onChange={onFileChange}
             accept=".jpg, .jpeg, .png"
           />
-
           <Avatar>
             <AvatarImage src={user?.user_metadata.avatar_url} />
           </Avatar>
         </div>
       </div>
       <Separator />
-      {isLoading ? (
-        <div className="flex items-center justify-center flex-grow">
-          <div className="flex flex-col items-center justify-center h-full gap-4">
-            <span className="flex items-center gap-2">
-              <ReloadIcon className="animate-spin" /> {currentMessage}
-            </span>
-            {uploadProgress > 0 && (
-              <div className="w-64">
-                <Progress value={uploadProgress} className="h-2" />
-              </div>
-            )}
-          </div>
-        </div>
-      ) : selectedImage ? (
-        <div className="relative flex-grow">
-          <div className="absolute inset-0">
-            <ImageRender
-              originalImage={selectedImage}
-              removedBgImage={removedBgImageUrl}
-              textSets={textSets}
-            />
-          </div>
-          <Toolbar
-            textSets={textSets}
-            setTextSets={setTextSets}
-            onToolSelect={handleToolSelect}
-          />
-        </div>
-      ) : (
-        <div className="flex items-center justify-center flex-grow flex-col gap-4">
+
+      <div className="flex-grow flex items-center justify-center">
+        {/* Upload button */}
+        <div className={`text-center ${!isLoading && !canvasReady ? 'block' : 'hidden'}`}>
           <Button
             onClick={handleUploadImage}
             disabled={isLoading}
-            className="relative px-4 py-2
-          rounded-lg max-sm:px-6 max-sm:py-6 text-lg"
+            className="px-4 py-2 rounded-lg max-sm:px-6 max-sm:py-6 text-lg mb-4"
           >
             <BadgePlus className="mr-2 h-5 w-5" />
             Create Design
           </Button>
-          <h2 className="text-xl px-4 align-middle font-semibold text-center">
+          <h2 className="text-xl px-4 align-middle font-semibold">
             Welcome,
             <br /> get started by uploading an image!
           </h2>
         </div>
-      )}
-      <canvas ref={canvasRef} style={{ display: "none" }} />
 
-      {selectedImage && (
-        <div className="absolute top-[calc(5rem)] left-0 right-0   w-full flex items-center justify-center">
-          <div className=" gap-3 flex p-4 rounded-lg bg-background/60 backdrop-blur-sm w-fit ">
-            <Button
-              onClick={handleUploadImage}
-              disabled={isLoading}
-              className="relative px-4 py-2   rounded-lg   flex items-center"
-              variant={"secondary"}
-            >
-              {isLoading ? (
-                <>
-                  <span className="animate-spin mr-2">⌛</span>
-                  Uploading...
-                </>
-              ) : selectedImage ? (
-                <>
-                  <BadgePlus className="mr-2 h-4 w-4" />
-                  New Design
-                </>
-              ) : (
-                <>
-                  <BadgePlus className="mr-2 h-4 w-4" />
-                  Create Design
-                </>
-              )}
-            </Button>
+        {/* Progress */}
+        <div className={`${isLoading ? 'flex' : 'hidden'} flex-col items-center justify-center`}>
+          <span className="flex items-center gap-2 mb-4">
+            <ReloadIcon className="animate-spin" /> {currentMessage}
+          </span>
+          {uploadProgress > 0 && (
+            <div className="w-64">
+              <Progress value={uploadProgress} className="h-2" />
+            </div>
+          )}
+        </div>
 
-            <Button
-              onClick={saveCompositeImage}
-              disabled={!isImageSetupDone}
-              className="flex items-center"
-            >
-              <Save className="mr-2 h-4 w-4" />
-              Save Image
-            </Button>
+        {/* Canvas */}
+        <div className={`w-full h-full ${canvasReady ? 'block' : 'hidden'}`}>
+          <ImageRender
+            canvasRef={canvasRef}
+            canvasReady={canvasReady}
+          />
+          <div className="absolute top-[calc(5rem)] left-0 right-0 w-full flex items-center justify-center">
+            <Toolbar
+              handleImageUpload={handleImageUpload}
+              setBackgroundImage={setBackgroundImage}
+              addText={addText}
+              changeFontFamily={changeFontFamily}
+              changeTextColor={changeTextColor}
+              flipImage={flipImage}
+              deleteSelectedObject={deleteSelectedObject}
+              downloadCanvas={downloadCanvas}
+              changeBackgroundColor={changeBackgroundColor}
+              currentBackgroundColor={currentBackgroundColor}
+              selectedTextProperties={selectedTextProperties}
+              toggleFilter={toggleFilter}
+              isImageSelected={isImageSelected}
+              toggleDrawingMode={toggleDrawingMode}
+              drawingSettings={drawingSettings}
+              incrementBrushSize={incrementBrushSize}
+              setBrushColor={setBrushColor}
+            />
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };
 
 export default EditorPage;
+
