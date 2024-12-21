@@ -31,17 +31,15 @@ import {
 
 } from "@/hooks/use-fabric"
 import { AnimatePresence, motion } from "framer-motion"
+import { ColorPicker } from "./editor/color-picker"
 
 interface ToolbarProps {
-  setBackgroundImage: (imageUrl: string) => Promise<Canvas | null>
   addText: () => void
   changeFontFamily: (fontFamily: string) => void
   changeTextColor: (color: string) => void
   flipImage: (direction: "horizontal" | "vertical") => void
   deleteSelectedObject: () => void
   downloadCanvas: () => void
-  changeBackgroundColor: (color: string) => void
-  currentBackgroundColor: string
   selectedTextProperties: selectedTextPropertiesProps
   toggleFilter: () => void
   isImageSelected: boolean
@@ -54,15 +52,12 @@ interface ToolbarProps {
 }
 
 export function Toolbar({
-  setBackgroundImage,
   addText,
   changeFontFamily,
   changeTextColor,
   flipImage,
   deleteSelectedObject,
   downloadCanvas,
-  changeBackgroundColor,
-  currentBackgroundColor,
   selectedTextProperties,
   toggleFilter,
   isImageSelected,
@@ -108,7 +103,7 @@ export function Toolbar({
     <div className="max-w-[100vw] px-5">
       <div className="no-scrollbar w-full overflow-x-auto rounded-full border bg-white sm:overflow-visible">
         <div className="flex items-center space-x-2 p-2 text-2xl md:justify-center">
-          <Button
+          {/* <Button
             {...getRootProps()}
             variant="outline"
             size={"icon"}
@@ -117,34 +112,11 @@ export function Toolbar({
             <span className="tooltiptext">Background</span>
             <input {...getInputProps()} />
             <Icons.background className="size-4" />
-          </Button>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                size={"icon"}
-                className="rounded-full hover:animate-jelly tooltip shrink-0 "
-                style={{ backgroundColor: currentBackgroundColor }}
-              >
-                <span className="tooltiptext">Color</span>
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent
-              className="mt-3 w-fit p-0 bg-transparent rounded-lg"
-              align="start"
-            >
-              <HexColorPicker
-                className="border-none"
-                color={currentBackgroundColor}
-                onChange={(color: string) => {
-                  return changeBackgroundColor(color)
-                }}
-              />
-            </PopoverContent>
-          </Popover>
-          <div className="h-5">
+          </Button> */}
+
+          {/* <div className="h-5">
             <div className="mx-1.5 h-full w-px bg-[#e5e5e5]"></div>
-          </div>
+          </div> */}
 
           <AnimatePresence>
             {isImageSelected && (
@@ -181,9 +153,7 @@ export function Toolbar({
               </motion.div>
             )}
           </AnimatePresence>
-          <div className="h-5">
-            <div className="mx-1.5 h-full w-px bg-[#e5e5e5]"></div>
-          </div>
+
           <Button
             onClick={addText}
             variant="outline"
@@ -312,8 +282,7 @@ export function Toolbar({
                     className="mt-3 w-fit p-0 bg-transparent rounded-lg"
                     align="start"
                   >
-                    <HexColorPicker
-                      className="border-none"
+                    <ColorPicker
                       color={selectedTextProperties.fontColor}
                       onChange={(color: string) => {
                         return changeTextColor(color)

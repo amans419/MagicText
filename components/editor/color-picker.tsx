@@ -14,18 +14,7 @@ import {
 } from "@/components/ui/popover";
 
 // Helper functions for color conversion
-const hslToHex = (h: number, s: number, l: number) => {
-  l /= 100;
-  const a = (s * Math.min(l, 1 - l)) / 100;
-  const f = (n: number) => {
-    const k = (n + h / 30) % 12;
-    const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
-    return Math.round(255 * color)
-      .toString(16)
-      .padStart(2, "0");
-  };
-  return `#${f(0)}${f(8)}${f(4)}`;
-};
+
 
 const hexToHsl = (hex: string): [number, number, number] => {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -156,21 +145,9 @@ export function ColorPicker({
   ];
 
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          className="w-[200px] justify-start text-left font-normal"
-        >
-          <div
-            className="w-4 h-4 rounded-full mr-2 shadow-sm"
-            style={{ backgroundColor: colorInput }}
-          />
-          <span className="flex-grow">{trimColorString(colorInput)}</span>
-          <ChevronDown className="h-4 w-4 opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-[240px] p-3">
+    <div>
+
+      <div className="bg-white rounded-md shadow-md p-2">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -261,7 +238,7 @@ export function ColorPicker({
             </AnimatePresence>
           </div>
         </motion.div>
-      </PopoverContent>
-    </Popover>
+      </div>
+    </div>
   );
 }

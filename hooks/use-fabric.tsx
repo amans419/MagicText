@@ -67,7 +67,7 @@ export function useFabric() {
     useState<DrawingPropertiesProps>({
       isDrawing: false,
       brushSize: 4,
-      brushColor: "#000000",
+      brushColor: "#ffffff",
     })
 
   useEffect(() => {
@@ -149,9 +149,9 @@ export function useFabric() {
       }
 
       if (activeObject) {
-        console.log('Object selected');
+        // console.log('Object selected');
         setIsObjectSelected(true);
-        console.log(isObjectSelected);
+        // console.log(isObjectSelected);
       }
       // Update image selection state
       if (activeObject && activeObject.type === "image") {
@@ -161,10 +161,7 @@ export function useFabric() {
       }
     }
 
-    const handleSelection = () => {
-      const activeObject = fabricCanvas.getActiveObject();
-      setIsObjectSelected(!!activeObject);
-    };
+
 
     // Load the brush for drawing
     fabricCanvas.freeDrawingBrush = new PencilBrush(fabricCanvas)
@@ -222,57 +219,7 @@ export function useFabric() {
   }, [drawingSettings, canvas])
 
 
-  async function setBackgroundImage(imageUrl: string): Promise<Canvas | null> {
-    if (!canvas) return null
 
-    const img = await FabricImage.fromURL(imageUrl)
-
-    if (!img) {
-      alert("Failed to load image")
-      return null
-    }
-
-    if (windowSize.width! > 768) {
-      // Desktop: Adjust canvas width based on the image aspect ratio
-      const imgWidth = (img.width! * CANVAS_DIMENSIONS.default) / img.height!
-
-      canvas.setDimensions({
-        width: imgWidth,
-        height: CANVAS_DIMENSIONS.default,
-      })
-    } else {
-      // Mobile: Adjust canvas dimensions to remain square or constrained
-      const size = Math.min(
-        windowSize.width! * CANVAS_DIMENSIONS.mobileMultiplier,
-
-        CANVAS_DIMENSIONS.default,
-      )
-
-      canvas.setDimensions({ width: size, height: size })
-    }
-
-    // Scale the background image to cover the entire canvas
-    const canvasWidth = canvas.width!
-    const canvasHeight = canvas.height!
-    const scaleX = canvasWidth / img.width!
-    const scaleY = canvasHeight / img.height!
-    const scale = Math.max(scaleX, scaleY)
-
-    img.scale(scale)
-    img.set({
-      originX: "center",
-      originY: "center",
-      left: canvasWidth / 2,
-      top: canvasHeight / 2,
-      objectCaching: false,
-    })
-
-    canvas.backgroundImage = img
-    canvas.renderAll()
-    canvas.centerObject(img);
-
-    return canvas
-  }
 
   function addText() {
     if (!canvas) return
@@ -465,13 +412,13 @@ export function useFabric() {
     }
   }
 
-  useEffect(() => {
-    console.log('Canvas state:', {
-      canvasExists: !!canvas,
-      canvasReady,
-      isLoading
-    });
-  }, [canvas, canvasReady, isLoading]);
+  // useEffect(() => {
+  //   console.log('Canvas state:', {
+  //     canvasExists: !!canvas,
+  //     canvasReady,
+  //     isLoading
+  //   });
+  // }, [canvas, canvasReady, isLoading]);
 
 
   // Update message based on progress
@@ -636,13 +583,12 @@ export function useFabric() {
     currentMessage,
     isLoading,
     canvasRef,
-    setBackgroundImage,
     addText,
     changeFontFamily,
     changeTextColor,
     canvasReady,
     flipImage,
-    changeBackgroundColor,
+    // changeBackgroundColor,
     currentBackgroundColor,
     deleteSelectedObject,
     downloadCanvas,

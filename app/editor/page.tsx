@@ -27,15 +27,12 @@ const EditorPage: React.FC = () => {
     uploadProgress,
     currentMessage,
     canvasReady,
-    setBackgroundImage,
     addText,
     changeFontFamily,
     changeTextColor,
     flipImage,
     deleteSelectedObject,
     downloadCanvas,
-    changeBackgroundColor,
-    currentBackgroundColor,
     selectedTextProperties,
     toggleFilter,
     isImageSelected,
@@ -118,15 +115,12 @@ const EditorPage: React.FC = () => {
           <div className="absolute top-[calc(5rem)] left-0 right-0 w-full flex items-center justify-center">
             <Toolbar
               handleImageUpload={handleImageUpload}
-              setBackgroundImage={setBackgroundImage}
               addText={addText}
               changeFontFamily={changeFontFamily}
               changeTextColor={changeTextColor}
               flipImage={flipImage}
               deleteSelectedObject={deleteSelectedObject}
               downloadCanvas={downloadCanvas}
-              changeBackgroundColor={changeBackgroundColor}
-              currentBackgroundColor={currentBackgroundColor}
               selectedTextProperties={selectedTextProperties}
               toggleFilter={toggleFilter}
               isImageSelected={isImageSelected}
