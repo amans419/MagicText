@@ -570,13 +570,7 @@ export function useFabric() {
     document.body.removeChild(link)
   }
 
-  function changeBackgroundColor(color: string) {
-    if (canvas) {
-      setCurrentBackgroundColor(color)
-      canvas.backgroundColor = color
-      canvas.renderAll()
-    }
-  }
+ 
 
   return {
     uploadProgress,
