@@ -2,15 +2,17 @@ import { useState, useRef, useEffect } from "react";
 import { motion, useAnimation } from "framer-motion";
 import Image from "next/image";
 import { useFabric } from "@/hooks/use-fabric";
+import { Canvas } from 'fabric';
 
 interface FabricImageRenderProps {
     canvasRef: React.RefObject<HTMLCanvasElement>;
     canvasReady: boolean;
+    isObjectSelected: boolean;
 }
 
 export default function ImageRender({
     canvasRef,
-
+    isObjectSelected,
     canvasReady,
 }: FabricImageRenderProps) {
     const [scale, setScale] = useState(1);
@@ -25,7 +27,6 @@ export default function ImageRender({
     const isZooming = useRef(false);
     const zoomTimeout = useRef<NodeJS.Timeout>();
     const lastZoomTime = useRef<number>(Date.now());
-
 
     const resetZoomState = () => {
         isZooming.current = false;
@@ -144,6 +145,10 @@ export default function ImageRender({
         setScale(1);
     }, [canvasReady]);
 
+    useEffect(() => {
+        console.log('Selection state:', { isObjectSelected });
+    }, [isObjectSelected]);
+
     return (
         <div
             className="w-full h-[calc(100vh-4rem)] overflow-hidden flex items-center justify-center bg-gray-100"
@@ -161,12 +166,12 @@ export default function ImageRender({
                 className="w-full h-full relative overflow-hidden flex items-center justify-center"
             >
                 <motion.div
-                    drag={!isZooming.current}
+                    drag={!isZooming.current && !isObjectSelected}
                     dragConstraints={constraintsRef}
                     dragElastic={0.1}
                     dragMomentum={false}
-                    onDragStart={() => setIsDragging(true)}
-                    onDragEnd={() => setIsDragging(false)}
+                    onDragStart={() => !isObjectSelected && setIsDragging(true)}
+                    onDragEnd={() => !isObjectSelected && setIsDragging(false)}
                     animate={controls}
                     onPan={handlePan}
                     onTouchStart={handleTouchStart}

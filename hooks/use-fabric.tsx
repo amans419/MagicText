@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { Canvas, FabricImage, PencilBrush } from "fabric"
 import * as fabric from "fabric"
 import { useWindow } from "@/hooks/use-window"
@@ -40,8 +40,8 @@ export interface DrawingPropertiesProps {
 }
 
 export function useFabric() {
-  const canvasRef = React.useRef<HTMLCanvasElement>(null)
-  const [canvas, setCanvas] = React.useState<Canvas | null>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const [canvas, setCanvas] = useState<Canvas | null>(null)
   const [currentBackgroundColor, setCurrentBackgroundColor] =
     React.useState<string>(DEFAULT_BACKGROUND_COLOR)
   const [selectedTextProperties, setSelectedTextProperties] =
@@ -56,18 +56,21 @@ export function useFabric() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [removedBgLayer, setRemovedBgLayer] = React.useState<FabricImage | null>(null);
   const [canvasReady, setCanvasReady] = useState(false);
+  const [isObjectSelected, setIsObjectSelected] = useState(false);
 
-  const [isImageSelected, setIsImageSelected] = React.useState<boolean>(false)
-  const [currentFilterIndex, setCurrentFilterIndex] = React.useState<number>(0)
+  const [isImageSelected, setIsImageSelected] = useState<boolean>(false)
+  const [currentFilterIndex, setCurrentFilterIndex] = useState<number>(0)
   const { isMobile, windowSize } = useWindow()
+
+
   const [drawingSettings, setDrawingSettings] =
-    React.useState<DrawingPropertiesProps>({
+    useState<DrawingPropertiesProps>({
       isDrawing: false,
       brushSize: 4,
       brushColor: "#000000",
     })
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!canvasRef.current) return
 
     const fabricCanvas = new Canvas(canvasRef.current, {
@@ -130,6 +133,7 @@ export function useFabric() {
     const updateSelectedProperties = () => {
       const activeObject = fabricCanvas.getActiveObject()
 
+
       if (activeObject && activeObject.type === "textbox") {
         setSelectedTextProperties({
           fontFamily: activeObject.get("fontFamily") as string,
@@ -144,6 +148,11 @@ export function useFabric() {
         })
       }
 
+      if (activeObject) {
+        console.log('Object selected');
+        setIsObjectSelected(true);
+        console.log(isObjectSelected);
+      }
       // Update image selection state
       if (activeObject && activeObject.type === "image") {
         setIsImageSelected(true)
@@ -151,6 +160,11 @@ export function useFabric() {
         setIsImageSelected(false)
       }
     }
+
+    const handleSelection = () => {
+      const activeObject = fabricCanvas.getActiveObject();
+      setIsObjectSelected(!!activeObject);
+    };
 
     // Load the brush for drawing
     fabricCanvas.freeDrawingBrush = new PencilBrush(fabricCanvas)
@@ -160,8 +174,10 @@ export function useFabric() {
     // Listen to multiple events that might change selection
     fabricCanvas.on("selection:created", updateSelectedProperties)
     fabricCanvas.on("selection:updated", updateSelectedProperties)
-    fabricCanvas.on("selection:cleared", updateSelectedProperties)
-
+    fabricCanvas.on("selection:cleared", () => {
+      updateSelectedProperties();
+      setIsObjectSelected(false);
+    });
     // Add a listener for object modifications
     fabricCanvas.on("object:modified", updateSelectedProperties)
 
@@ -638,6 +654,6 @@ export function useFabric() {
     setBrushColor,
     drawingSettings,
     handleImageUpload,
-
+    isObjectSelected
   }
 }

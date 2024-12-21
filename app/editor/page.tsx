@@ -20,6 +20,7 @@ const EditorPage: React.FC = () => {
   const { session } = useSessionContext();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const {
+    isObjectSelected,
     handleImageUpload,
     canvasRef,
     isLoading,
@@ -112,6 +113,7 @@ const EditorPage: React.FC = () => {
           <ImageRender
             canvasRef={canvasRef}
             canvasReady={canvasReady}
+            isObjectSelected={isObjectSelected}
           />
           <div className="absolute top-[calc(5rem)] left-0 right-0 w-full flex items-center justify-center">
             <Toolbar
