@@ -8,14 +8,14 @@ import { removeBackground } from "@imgly/background-removal";
 const CANVAS_DIMENSIONS = { default: 500, mobileMultiplier: 0.9 }
 const DEFAULT_BACKGROUND_COLOR = "#005DFF"
 const DEFAULT_FONT_COLOR = "#ffffff"
-const DEFAULT_FONT_FAMILY = "Impact"
+const DEFAULT_FONT_FAMILY = "Shrikhand"
 const DEFAULT_TEXT_OPTIONS = {
-  text: "Your Text Here",
-  fontSize: 40,
+  text: "edit",
+  fontSize: 150,
   fontFamily: DEFAULT_FONT_FAMILY,
   fill: DEFAULT_FONT_COLOR,
-  // stroke: "black",
-  // strokeWidth: 1.5,
+  stroke: "black",
+  strokeWidth: 1.5,
   textAlign: "center",
 }
 const loadingMessages = [
@@ -29,8 +29,6 @@ const loadingMessages = [
   { threshold: 95, message: "Finalizing...", time: 14000 }
 ];
 
-
-
 export interface selectedTextPropertiesProps {
   fontFamily: string
   fontColor: string
@@ -41,6 +39,12 @@ export interface DrawingPropertiesProps {
   isDrawing: boolean
   brushSize: number
   brushColor: string
+}
+
+export interface strokeSettingsProps {
+  color: string;
+  width: number;
+  enabled: boolean;
 }
 
 export function useFabric() {
@@ -65,7 +69,13 @@ export function useFabric() {
   const [isImageSelected, setIsImageSelected] = useState<boolean>(false)
   const [currentFilterIndex, setCurrentFilterIndex] = useState<number>(0)
   const { isMobile, windowSize } = useWindow()
+  const [showStrokeUI, setShowStrokeUI] = useState(false);
 
+  const [strokeSettings, setStrokeSettings] = useState({
+    color: '#000000',
+    width: 1.5,
+    enabled: false
+  });
 
   const [drawingSettings, setDrawingSettings] =
     useState<DrawingPropertiesProps>({
@@ -232,15 +242,21 @@ export function useFabric() {
       ...DEFAULT_TEXT_OPTIONS,
       left: canvas.getWidth() / 2,
       top: canvas.getHeight() / 2,
-      width: canvas.getWidth() * 0.8,
+      width: canvas.getWidth() * 0.1,
       originX: "center",
       originY: "center",
       selectable: true,
       evented: true,
+      strokeWidth: 0,
+      stroke: '',
       lockMovementX: false,
       lockMovementY: false,
       hasControls: true,
       hasBorders: true,
+      padding: 4,
+      splitByGrapheme: false,
+      lockUniScaling: true, // Maintain aspect ratio when scaling
+      centeredScaling: true,
 
     })
 
@@ -271,6 +287,101 @@ export function useFabric() {
       }))
 
       canvas.renderAll()
+    }
+  }
+
+
+
+  function removeStroke() {
+    if (!canvas) return;
+
+    const activeObject = canvas.getActiveObject();
+    if (activeObject && activeObject.type === "textbox") {
+      const text = activeObject as fabric.Textbox;
+
+      text.set({
+        stroke: '',
+        strokeWidth: 0
+      });
+
+      setStrokeSettings(prev => ({
+        ...prev,
+        enabled: false
+      }));
+
+      setShowStrokeUI(false);
+      canvas.renderAll();
+    }
+  }
+
+  function addStroke() {
+    if (!canvas) return;
+
+    setShowStrokeUI(prev => !prev);
+
+    const activeObject = canvas.getActiveObject();
+    if (activeObject && activeObject.type === "textbox") {
+      const text = activeObject as fabric.Textbox;
+
+      setStrokeSettings(prev => {
+        const enabled = !prev.enabled;
+
+        text.set({
+          stroke: enabled ? prev.color : '',
+          strokeWidth: enabled ? prev.width : 0
+        });
+
+        canvas.renderAll();
+
+        return {
+          ...prev,
+          enabled
+        };
+      });
+    }
+  }
+
+
+  function updateStrokeColor(color: string) {
+    if (!canvas) return;
+
+    const activeObject = canvas.getActiveObject();
+    if (activeObject && activeObject.type === "textbox") {
+      const text = activeObject as fabric.Textbox;
+      text.set("stroke", color);
+
+      setStrokeSettings(prev => ({
+        ...prev,
+        color,
+        enabled: true
+      }));
+
+      canvas.renderAll();
+    }
+  }
+
+  function updateStrokeWidth() {
+    if (!canvas) return;
+
+    const activeObject = canvas.getActiveObject();
+    if (activeObject && activeObject.type === "textbox") {
+      const text = activeObject as fabric.Textbox;
+
+      setStrokeSettings(prev => {
+        let newWidth = prev.width + 0.5;
+        if (newWidth > 5) {
+          newWidth = 0.5;
+        }
+
+        text.set("strokeWidth", newWidth);
+        canvas.renderAll();
+
+        return {
+          ...prev,
+          width: newWidth,
+          enabled: true
+        };
+      });
     }
   }
 
@@ -538,9 +649,10 @@ export function useFabric() {
     changeFontFamily,
     changeTextColor,
     canvasReady,
+    showStrokeUI,
     flipImage,
-    // changeBackgroundColor,
-    currentBackgroundColor,
+    addStroke,
+    removeStroke,
     deleteSelectedObject,
     downloadCanvas,
     selectedTextProperties,
@@ -549,8 +661,11 @@ export function useFabric() {
     toggleDrawingMode,
     incrementBrushSize,
     setBrushColor,
+    strokeSettings,
     drawingSettings,
     handleImageUpload,
-    isObjectSelected
+    isObjectSelected,
+    updateStrokeColor,
+    updateStrokeWidth
   }
 }

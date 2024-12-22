@@ -14,6 +14,7 @@ import { Toolbar } from "@/components/toolbar"
 import ImageRender from "@/components/image-render"
 
 import "@/app/fonts.css"
+import AnimatedProgress from "@/components/AnimatedProgress";
 
 const EditorPage: React.FC = () => {
   const { user } = useUser();
@@ -40,6 +41,12 @@ const EditorPage: React.FC = () => {
     incrementBrushSize,
     setBrushColor,
     drawingSettings,
+    addStroke,
+    updateStrokeColor,
+    updateStrokeWidth,
+    strokeSettings,
+    showStrokeUI,
+    removeStroke
   } = useFabric();
 
   const handleUploadImage = () => {
@@ -95,14 +102,8 @@ const EditorPage: React.FC = () => {
 
         {/* Progress */}
         <div className={`${isLoading ? 'flex' : 'hidden'} flex-col items-center justify-center`}>
-          <span className="flex items-center gap-2 mb-4">
-            <ReloadIcon className="animate-spin" /> {currentMessage}
-          </span>
-          {uploadProgress > 0 && (
-            <div className="w-64">
-              <Progress value={uploadProgress} className="h-2" />
-            </div>
-          )}
+
+          <AnimatedProgress uploadProgress={uploadProgress} currentMessage={currentMessage} />
         </div>
 
         {/* Canvas */}
@@ -114,6 +115,12 @@ const EditorPage: React.FC = () => {
           />
           <div className="absolute top-[calc(5rem)] left-0 right-0 w-full flex items-center justify-center">
             <Toolbar
+              removeStroke={removeStroke}
+              showStrokeUI={showStrokeUI}
+              strokeSettings={strokeSettings}
+              updateStrokeColor={updateStrokeColor}
+              updateStrokeWidth={updateStrokeWidth}
+              addStroke={addStroke}
               handleImageUpload={handleImageUpload}
               addText={addText}
               changeFontFamily={changeFontFamily}

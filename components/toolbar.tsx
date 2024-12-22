@@ -22,13 +22,13 @@ import {
 } from "@/components/ui/command"
 // import { ScrollArea } from "./ui/scroll-area"
 import { otherFonts, recommendedFonts } from "@/lib/constants"
-import { CheckIcon } from "lucide-react"
+import { CheckIcon, StarOff, Circle } from "lucide-react"
 import { cn } from "@/lib/utils"
 import {
   DrawingPropertiesProps,
   selectedTextPropertiesProps,
+  strokeSettingsProps,
   useFabric,
-
 } from "@/hooks/use-fabric"
 import { AnimatePresence, motion } from "framer-motion"
 import { ColorPicker } from "./editor/color-picker"
@@ -41,6 +41,7 @@ interface ToolbarProps {
   deleteSelectedObject: () => void
   downloadCanvas: () => void
   selectedTextProperties: selectedTextPropertiesProps
+  strokeSettings: strokeSettingsProps
   toggleFilter: () => void
   isImageSelected: boolean
   toggleDrawingMode: () => void
@@ -48,7 +49,11 @@ interface ToolbarProps {
   setBrushColor: (color: string) => void
   drawingSettings: DrawingPropertiesProps
   handleImageUpload: (file: File) => Promise<void>;  // Changed return type
-
+  addStroke: () => void;
+  updateStrokeWidth: () => void;
+  updateStrokeColor: (ccolor: string) => void;
+  showStrokeUI: boolean;
+  removeStroke: () => void;
 }
 
 export function Toolbar({
@@ -65,6 +70,12 @@ export function Toolbar({
   incrementBrushSize,
   setBrushColor,
   drawingSettings,
+  addStroke,
+  updateStrokeWidth,
+  updateStrokeColor,
+  strokeSettings,
+  showStrokeUI,
+  removeStroke
 }: ToolbarProps) {
   const {
     handleImageUpload,
@@ -118,7 +129,7 @@ export function Toolbar({
             <div className="mx-1.5 h-full w-px bg-[#e5e5e5]"></div>
           </div> */}
 
-          <AnimatePresence>
+          {/* <AnimatePresence>
             {isImageSelected && (
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
@@ -152,7 +163,7 @@ export function Toolbar({
                 </Button>
               </motion.div>
             )}
-          </AnimatePresence>
+          </AnimatePresence> */}
 
           <Button
             onClick={addText}
@@ -289,7 +300,80 @@ export function Toolbar({
                       }}
                     />
                   </PopoverContent>
+
+
                 </Popover>
+
+                {selectedTextProperties.isTextSelected && showStrokeUI && <div className="h-5">
+                  <div className="mx-1.5 h-full w-px bg-[#e5e5e5]"></div>
+                </div>
+                }
+
+
+                <Button
+                  onClick={selectedTextProperties.isTextSelected && showStrokeUI ? removeStroke : addStroke}
+                  variant="outline"
+                  size={"icon"}
+                  className="rounded-full hover:animate-jelly tooltip shrink-0"
+                >
+                  <span className="tooltiptext">{selectedTextProperties.isTextSelected && showStrokeUI ? "Remove Stroke" : "Stroke"}</span>
+                  {selectedTextProperties.isTextSelected && showStrokeUI ? <Icons.removeStroke /> : <Icons.stroke />}                </Button>
+                <AnimatePresence>
+                  {selectedTextProperties.isTextSelected && showStrokeUI && (
+                    <motion.div
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20, transition: { duration: 0.09 } }}
+                      transition={{
+                        duration: 0.1,
+                        stiffness: 900,
+                        type: "spring",
+                        damping: 50,
+                      }}
+                      className="flex items-center space-x-2">
+
+                      <div>
+                        <Button
+                          variant="outline"
+                          size={"icon"}
+                          className="rounded-full hover:animate-jelly tooltip shrink-0 "
+                          onClick={updateStrokeWidth}
+                        >
+                          <span className="tooltiptext">Stroke</span>
+                          {strokeSettings.width}
+
+                        </Button>
+                      </div>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size={"icon"}
+                            className="rounded-full hover:animate-jelly tooltip shrink-0 "
+                            style={{
+                              backgroundColor: strokeSettings.color,
+                            }}
+                          >
+                            <span className="tooltiptext">Stroke Color</span>
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent
+                          className="mt-3 w-fit p-0 bg-transparent rounded-lg"
+                          align="start"
+                        >
+                          <ColorPicker
+                            color={strokeSettings.color}
+                            onChange={(color: string) => {
+                              return updateStrokeColor(color)
+                            }}
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* //stroke */}
               </motion.div>
             )}
           </AnimatePresence>
