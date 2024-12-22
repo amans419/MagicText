@@ -25,6 +25,7 @@ import { otherFonts, recommendedFonts } from "@/lib/constants"
 import { CheckIcon, StarOff, Circle } from "lucide-react"
 import { cn } from "@/lib/utils"
 import {
+  ColorProps,
   DrawingPropertiesProps,
   selectedTextPropertiesProps,
   strokeSettingsProps,
@@ -32,11 +33,12 @@ import {
 } from "@/hooks/use-fabric"
 import { AnimatePresence, motion } from "framer-motion"
 import { ColorPicker } from "./editor/color-picker"
+import { GradientStop } from '@/hooks/use-fabric';
 
 interface ToolbarProps {
   addText: () => void
   changeFontFamily: (fontFamily: string) => void
-  changeTextColor: (color: string) => void
+  changeTextColor: (color: ColorProps) => void;
   flipImage: (direction: "horizontal" | "vertical") => void
   deleteSelectedObject: () => void
   downloadCanvas: () => void
@@ -295,9 +297,7 @@ export function Toolbar({
                   >
                     <ColorPicker
                       color={selectedTextProperties.fontColor}
-                      onChange={(color: string) => {
-                        return changeTextColor(color)
-                      }}
+                      onChange={(color) => changeTextColor(color)}
                     />
                   </PopoverContent>
 
@@ -361,12 +361,12 @@ export function Toolbar({
                           className="mt-3 w-fit p-0 bg-transparent rounded-lg"
                           align="start"
                         >
-                          <ColorPicker
+                          {/* <ColorPicker
                             color={strokeSettings.color}
                             onChange={(color: string) => {
                               return updateStrokeColor(color)
                             }}
-                          />
+                          /> */}
                         </PopoverContent>
                       </Popover>
                     </motion.div>

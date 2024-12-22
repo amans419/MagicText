@@ -4,6 +4,7 @@ import * as fabric from "fabric"
 import { useWindow } from "@/hooks/use-window"
 import { filterNames, getFilter } from "@/lib/constants"
 import { removeBackground } from "@imgly/background-removal";
+import { useToast } from "@/hooks/use-toast";
 
 const CANVAS_DIMENSIONS = { default: 500, mobileMultiplier: 0.9 }
 const DEFAULT_BACKGROUND_COLOR = "#005DFF"
@@ -47,6 +48,21 @@ export interface strokeSettingsProps {
   enabled: boolean;
 }
 
+export interface GradientStop {
+  offset: number;
+  color: string;
+}
+
+
+
+interface GradientColor {
+  type: 'gradient';
+  stops: GradientStop[];
+  direction: 'horizontal' | 'vertical';
+}
+export type ColorProps = string | GradientColor;
+
+
 export function useFabric() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [canvas, setCanvas] = useState<Canvas | null>(null)
@@ -60,7 +76,7 @@ export function useFabric() {
     })
   const [uploadProgress, setUploadProgress] = useState(0);
   const [currentMessage, setCurrentMessage] = useState(loadingMessages[0].message);
-
+  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [removedBgLayer, setRemovedBgLayer] = React.useState<FabricImage | null>(null);
   const [canvasReady, setCanvasReady] = useState(false);
@@ -249,6 +265,7 @@ export function useFabric() {
       evented: true,
       strokeWidth: 0,
       stroke: '',
+
       lockMovementX: false,
       lockMovementY: false,
       hasControls: true,
@@ -259,6 +276,15 @@ export function useFabric() {
       centeredScaling: true,
 
     })
+
+
+    text.on('scaling', () => {
+      if (text.fill instanceof fabric.Gradient) {
+        // Use identity matrix instead of null
+        text.fill.gradientTransform = [1, 0, 0, 1, 0, 0];
+        canvas?.requestRenderAll();
+      }
+    });
 
     // Add text first
     canvas.add(text)
@@ -385,24 +411,57 @@ export function useFabric() {
     }
   }
 
-  function changeTextColor(color: string) {
-    if (!canvas) return
+  function changeTextColor(color: ColorProps) {
+    if (!canvas) return;
 
-    const activeObject = canvas.getActiveObject()
+    const activeObject = canvas.getActiveObject();
     if (activeObject && activeObject.type === "textbox") {
-      const text = activeObject as fabric.Textbox
-      text.set("fill", color)
+      const text = activeObject as fabric.Textbox;
 
-      // Immediately update the selected text properties
+      if (typeof color === 'string') {
+        text.set("fill", color);
+      } else if (color.type === 'gradient') {
+        // Validate gradient stops
+        const validStops = color.stops.filter(stop => stop.offset >= 0 && stop.offset <= 1);
+
+        if (validStops.length !== color.stops.length) {
+          toast({
+            variant: "destructive",
+            title: "Invalid Gradient Value",
+            description: "Invalid gradient stop values. Using valid stops only.",
+          });
+        }
+
+        if (validStops.length < 2) {
+          toast({
+            variant: "destructive",
+            title: "Invalid Gradient Value",
+            description: "Not enough valid gradient stops. Using default gradient.",
+          });
+          validStops.push({ offset: 0, color: '#FF0000' }, { offset: 1, color: '#0000FF' });
+        }
+
+        const coords = color.direction === 'horizontal'
+          ? { x1: 0, y1: 0, x2: 1, y2: 0 }
+          : { x1: 0, y1: 0, x2: 0, y2: 1 };
+
+        const gradient = new fabric.Gradient({
+          type: 'linear',
+          gradientUnits: 'percentage',
+          coords,
+          colorStops: validStops.map(stop => ({ ...stop, opacity: 1 }))
+        });
+        text.set("fill", gradient);
+      }
+
       setSelectedTextProperties((prev) => ({
         ...prev,
-        fontColor: color,
-      }))
+        fontColor: typeof color === 'string' ? color : 'gradient'
+      }));
 
-      canvas.renderAll()
+      canvas.renderAll();
     }
   }
-
 
   // Add inside useFabric() function
   async function handleImageUpload(file: File): Promise<void> {
