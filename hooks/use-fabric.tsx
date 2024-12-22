@@ -19,12 +19,16 @@ const DEFAULT_TEXT_OPTIONS = {
   textAlign: "center",
 }
 const loadingMessages = [
-  { threshold: 0, message: "Processing image..." },
-  { threshold: 20, message: "Removing background..." },
-  { threshold: 40, message: "Adjusting effects..." },
-  { threshold: 60, message: "Almost there..." },
-  { threshold: 80, message: "Finalizing your design..." },
+  { threshold: 5, message: "Initializing...", time: 0 },
+  { threshold: 15, message: "Starting background removal...", time: 2000 },
+  { threshold: 30, message: "Processing image...", time: 4000 },
+  { threshold: 45, message: "Analyzing details...", time: 6000 },
+  { threshold: 60, message: "Removing background...", time: 8000 },
+  { threshold: 75, message: "Enhancing edges...", time: 10000 },
+  { threshold: 85, message: "Almost done...", time: 12000 },
+  { threshold: 95, message: "Finalizing...", time: 14000 }
 ];
+
 
 
 export interface selectedTextPropertiesProps {
@@ -295,20 +299,28 @@ export function useFabric() {
       setIsLoading(true)
       setUploadProgress(0)
 
-      const progressInterval = setInterval(() => {
-        setUploadProgress((prev) => {
-          if (prev >= 90) {
-            clearInterval(progressInterval)
-            return 90
-          }
-          return prev + 10
-        })
-      }, 200)
-
       const imageUrl = URL.createObjectURL(file)
+      const startTime = Date.now();
+      let currentIndex = 0;
+
+      const progressInterval = setInterval(() => {
+        const elapsedTime = Date.now() - startTime;
+
+        if (currentIndex < loadingMessages.length &&
+          elapsedTime >= loadingMessages[currentIndex].time) {
+          setUploadProgress(loadingMessages[currentIndex].threshold);
+          setCurrentMessage(loadingMessages[currentIndex].message);
+          currentIndex++;
+        }
+      }, 1000);
+
+
       await setupImage(imageUrl)
 
-      clearInterval(progressInterval)
+      clearInterval(progressInterval);
+      setUploadProgress(100);
+      setCurrentMessage("Complete!");
+
       setUploadProgress(100)
     } catch (error) {
       console.error("Error uploading image:", error)
@@ -324,6 +336,7 @@ export function useFabric() {
 
     setCanvasReady(false);
     setIsLoading(true);
+    setUploadProgress(0);
 
 
     try {
@@ -370,9 +383,10 @@ export function useFabric() {
       }
 
       // Remove background and add as layer
-      const imageBlob = await removeBackground(imageUrl)
+      const imageBlob = await removeBackground(imageUrl);
       const removedBgUrl = URL.createObjectURL(imageBlob)
       const removedBgImage = await FabricImage.fromURL(removedBgUrl)
+      setUploadProgress(100);
 
       // Use same scale as original
       removedBgImage.set({
@@ -421,63 +435,6 @@ export function useFabric() {
   // }, [canvas, canvasReady, isLoading]);
 
 
-  // Update message based on progress
-  useEffect(() => {
-    const currentMessageObj = loadingMessages
-      .reverse()
-      .find((msg) => uploadProgress >= msg.threshold);
-
-    if (currentMessageObj) {
-      setCurrentMessage(currentMessageObj.message);
-    }
-  }, [uploadProgress]);
-
-
-
-  // async function addImage(file: File): Promise<void> {
-  //   if (!canvas) return;
-
-  //   try {
-  //     setIsLoading(true);
-
-  //     const imageUrl = URL.createObjectURL(file);
-
-  //     return new Promise((resolve, reject) => {
-  //       fabric.Image.fromURL(
-  //         imageUrl,
-  //         function (img) {
-  //           // Set initial position
-  //           img.set({
-  //             left: canvas.width! / 2,
-  //             top: canvas.height! / 2,
-  //             originX: 'center',
-  //             originY: 'center',
-  //           });
-
-  //           // Scale image to reasonable size
-  //           if (img.width! > canvas.width! / 3) {
-  //             const scale = (canvas.width! / 3) / img.width!;
-  //             img.scale(scale);
-  //           }
-
-  //           canvas.add(img);
-  //           canvas.setActiveObject(img);
-  //           canvas.sendToBack(img);
-  //           canvas.renderAll();
-  //           resolve();
-  //         },
-  //         {
-  //           crossOrigin: 'anonymous'
-  //         }
-  //       );
-  //     });
-
-  //   } catch (error) {
-  //     console.error("Error adding image:", error);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // }
 
 
   function flipImage(direction: "horizontal" | "vertical") {
@@ -570,7 +527,7 @@ export function useFabric() {
     document.body.removeChild(link)
   }
 
- 
+
 
   return {
     uploadProgress,
