@@ -29,6 +29,10 @@ const loadingMessages = [
   { threshold: 85, message: "Almost done...", time: 12000 },
   { threshold: 95, message: "Finalizing...", time: 14000 }
 ];
+interface TextStrokeSettings {
+  id: string;
+  hasStroke: boolean;
+}
 
 export interface selectedTextPropertiesProps {
   fontFamily: string
@@ -55,11 +59,31 @@ export interface GradientStop {
 
 
 
+export interface FabricGradient {
+  type: 'linear';
+  colorStops: GradientStop[];
+  coords?: {
+    x1: number;
+    y1: number;
+    x2: number;
+    y2: number;
+  };
+  gradientUnits?: string;
+}
+
+export interface CustomGradient {
+  type: 'gradient';
+  stops: GradientStop[];
+  direction?: 'horizontal' | 'vertical';
+}
+
 interface GradientColor {
   type: 'gradient';
   stops: GradientStop[];
   direction: 'horizontal' | 'vertical';
 }
+
+export type GradientColors = FabricGradient | CustomGradient;
 export type ColorProps = string | GradientColor;
 
 
@@ -74,6 +98,8 @@ export function useFabric() {
       fontColor: DEFAULT_FONT_COLOR,
       isTextSelected: false,
     })
+  const [textStrokeMap, setTextStrokeMap] = useState<Map<string, boolean>>(new Map());
+
   const [uploadProgress, setUploadProgress] = useState(0);
   const [currentMessage, setCurrentMessage] = useState(loadingMessages[0].message);
   const { toast } = useToast();
@@ -204,6 +230,7 @@ export function useFabric() {
     fabricCanvas.on("selection:cleared", () => {
       updateSelectedProperties();
       setIsObjectSelected(false);
+
     });
     // Add a listener for object modifications
     fabricCanvas.on("object:modified", updateSelectedProperties)
@@ -247,6 +274,30 @@ export function useFabric() {
     }
     canvas.renderAll()
   }, [drawingSettings, canvas])
+
+
+  useEffect(() => {
+    if (!canvas) return;
+
+    const handleObjectSelection = () => {
+      const activeObject = canvas.getActiveObject();
+      if (activeObject && activeObject.type === "textbox") {
+        const text = activeObject as fabric.Textbox;
+        const hasStroke = Boolean(text.stroke) && text.strokeWidth > 0;
+        setShowStrokeUI(hasStroke);
+      }
+    };
+
+    canvas.on('selection:created', handleObjectSelection);
+    canvas.on('selection:updated', handleObjectSelection);
+    canvas.on('selection:cleared', () => setShowStrokeUI(false));
+
+    return () => {
+      canvas.off('selection:created', handleObjectSelection);
+      canvas.off('selection:updated', handleObjectSelection);
+      canvas.off('selection:cleared');
+    };
+  }, [canvas]);
 
 
 
@@ -343,7 +394,7 @@ export function useFabric() {
   function addStroke() {
     if (!canvas) return;
 
-    setShowStrokeUI(prev => !prev);
+    // setShowStrokeUI(prev => !prev);
 
     const activeObject = canvas.getActiveObject();
     if (activeObject && activeObject.type === "textbox") {
@@ -357,6 +408,8 @@ export function useFabric() {
           strokeWidth: enabled ? prev.width : 0
         });
 
+        setShowStrokeUI(enabled);
+
         canvas.renderAll();
 
         return {
@@ -368,24 +421,58 @@ export function useFabric() {
   }
 
 
-  function updateStrokeColor(color: string) {
+  function updateStrokeColor(color: ColorProps) {
     if (!canvas) return;
 
     const activeObject = canvas.getActiveObject();
     if (activeObject && activeObject.type === "textbox") {
       const text = activeObject as fabric.Textbox;
-      text.set("stroke", color);
+
+      if (typeof color === 'string') {
+        text.set("stroke", color);
+      } else if (color.type === 'gradient') {
+        // Validate gradient stops
+        const validStops = color.stops.filter(stop => stop.offset >= 0 && stop.offset <= 1);
+
+        if (validStops.length !== color.stops.length) {
+          toast({
+            variant: "destructive",
+            title: "Invalid Gradient Value",
+            description: "Invalid gradient stop values. Using valid stops only.",
+          });
+        }
+
+        if (validStops.length < 2) {
+          toast({
+            variant: "destructive",
+            title: "Invalid Gradient Value",
+            description: "Not enough valid gradient stops. Using default gradient.",
+          });
+          validStops.push({ offset: 0, color: '#FF0000' }, { offset: 1, color: '#0000FF' });
+        }
+
+        const coords = color.direction === 'horizontal'
+          ? { x1: 0, y1: 0, x2: 1, y2: 0 }
+          : { x1: 0, y1: 0, x2: 0, y2: 1 };
+
+        const gradient = new fabric.Gradient({
+          type: 'linear',
+          gradientUnits: 'percentage',
+          coords,
+          colorStops: validStops.map(stop => ({ ...stop, opacity: 1 }))
+        });
+        text.set("stroke", gradient);
+      }
 
       setStrokeSettings(prev => ({
         ...prev,
-        color,
+        color: typeof color === 'string' ? color : 'gradient',
         enabled: true
       }));
 
       canvas.renderAll();
     }
   }
-
   function updateStrokeWidth() {
     if (!canvas) return;
 

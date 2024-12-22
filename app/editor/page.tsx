@@ -113,7 +113,7 @@ const EditorPage: React.FC = () => {
             canvasReady={canvasReady}
             isObjectSelected={isObjectSelected}
           />
-          <div className="absolute top-[calc(5rem)] left-0 right-0 w-full flex items-center justify-center">
+          <div className="absolute bottom-[calc(5rem)] left-0 right-0 w-full flex items-center justify-center">
             <Toolbar
               removeStroke={removeStroke}
               showStrokeUI={showStrokeUI}

@@ -27,6 +27,7 @@ import { cn } from "@/lib/utils"
 import {
   ColorProps,
   DrawingPropertiesProps,
+  GradientColors,
   selectedTextPropertiesProps,
   strokeSettingsProps,
   useFabric,
@@ -34,6 +35,22 @@ import {
 import { AnimatePresence, motion } from "framer-motion"
 import { ColorPicker } from "./editor/color-picker"
 import { GradientStop } from '@/hooks/use-fabric';
+import { isFabricGradient, isGradientColor } from "@/hooks/get-gradient"
+
+interface StrokeSettings {
+  color: string | GradientColor;
+  width: number;
+  enabled: boolean;
+}
+
+
+export interface GradientColor {
+  type: 'gradient';
+  direction: 'horizontal' | 'vertical';
+  stops: GradientStop[];
+}
+
+export type Color = string | GradientColor;
 
 interface ToolbarProps {
   addText: () => void
@@ -42,7 +59,11 @@ interface ToolbarProps {
   flipImage: (direction: "horizontal" | "vertical") => void
   deleteSelectedObject: () => void
   downloadCanvas: () => void
-  selectedTextProperties: selectedTextPropertiesProps
+  selectedTextProperties: {
+    fontColor: Color;
+    fontFamily: string;
+    isTextSelected: boolean;
+  };
   strokeSettings: strokeSettingsProps
   toggleFilter: () => void
   isImageSelected: boolean
@@ -53,10 +74,23 @@ interface ToolbarProps {
   handleImageUpload: (file: File) => Promise<void>;  // Changed return type
   addStroke: () => void;
   updateStrokeWidth: () => void;
-  updateStrokeColor: (ccolor: string) => void;
+  updateStrokeColor: (color: ColorProps) => void;
   showStrokeUI: boolean;
   removeStroke: () => void;
 }
+function getGradientBackground(color: Color): string {
+  if (!isGradientColor(color)) {
+    return typeof color === 'string' ? color : '#000000';
+  }
+
+  const stops = isFabricGradient(color) ? color.colorStops : color.stops;
+  return `linear-gradient(${stops.map(stop =>
+    `${stop.color} ${stop.offset * 100}%`
+  ).join(', ')})`;
+}
+
+
+
 
 export function Toolbar({
   addText,
@@ -111,6 +145,7 @@ export function Toolbar({
   })
 
   const { isMobile } = useWindow()
+
 
   return (
     <div className="max-w-[100vw] px-5">
@@ -285,10 +320,9 @@ export function Toolbar({
                       size={"icon"}
                       className="rounded-full hover:animate-jelly tooltip shrink-0 "
                       style={{
-                        backgroundColor: selectedTextProperties.fontColor,
+                        backgroundColor: getGradientBackground(selectedTextProperties.fontColor),
                       }}
-                    >
-                      <span className="tooltiptext">Text Color</span>
+                    >                                      <span className="tooltiptext">Text Color</span>
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent

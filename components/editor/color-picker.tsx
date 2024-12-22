@@ -92,6 +92,7 @@ export function ColorPicker({ color, onChange }: ColorPickerProps) {
   const { toast } = useToast();
 
   const [colorInput, setColorInput] = useState(typeof color === 'string' ? color : '');
+
   const [gradientStops, setGradientStops] = useState<GradientStop[]>(() => {
     if (typeof color === 'object' && color.type === 'gradient') {
       return color.stops.slice(0, 2);
@@ -111,7 +112,7 @@ export function ColorPicker({ color, onChange }: ColorPickerProps) {
     typeof color === 'string' || color === undefined ? 'solid' : 'gradient'
   );
   const [gradientDirection, setGradientDirection] = useState<'horizontal' | 'vertical'>(
-    typeof color === 'object' && color.type === 'gradient' ? color.direction : 'horizontal'
+    typeof color === 'object' && color.type === 'gradient' ? color.direction : 'vertical'
   );
 
 
@@ -214,145 +215,148 @@ export function ColorPicker({ color, onChange }: ColorPickerProps) {
   ];
 
   return (
-    <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'solid' | 'gradient')}>
-      <TabsList>
-        <TabsTrigger value="solid">Solid</TabsTrigger>
-        <TabsTrigger value="gradient">Gradient</TabsTrigger>
-      </TabsList>
-      <TabsContent value="solid">
-        <div>
-          <div className="bg-white rounded-md shadow-md p-2">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.2 }}
-              className="space-y-3"
-            >
+
+    <div className="flex flex-col items-center justify-center bg-white rounded-md shadow-md p-2  ">
+      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'solid' | 'gradient')}>
+        <TabsList className="flex items-center justify-center">
+          <TabsTrigger value="solid" className="w-full">Solid</TabsTrigger>
+          <TabsTrigger value="gradient" className="w-full">Gradient</TabsTrigger>
+        </TabsList>
+        <TabsContent value="solid">
+          <div>
+            <div className=" ">
               <motion.div
-                className="w-full h-40 rounded-lg cursor-crosshair relative overflow-hidden"
-                style={{
-                  background: `
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.2 }}
+                className="space-y-3"
+              >
+                <motion.div
+                  className="w-full h-40 rounded-lg cursor-crosshair relative overflow-hidden"
+                  style={{
+                    background: `
                 linear-gradient(to top, rgba(0, 0, 0, 1), transparent),
                 linear-gradient(to right, rgba(255, 255, 255, 1), rgba(255, 0, 0, 0)),
                 hsl(${hsl[0]}, 100%, 50%)
               `,
-                }}
-                onClick={handleSaturationLightnessChange}
-              >
-                <motion.div
-                  className="w-4 h-4 rounded-full border-2 border-white absolute shadow-md"
-                  style={{
-                    left: `${hsl[1]}%`,
-                    top: `${100 - hsl[2]}%`,
-                    backgroundColor: `hsl(${hsl[0]}, ${hsl[1]}%, ${hsl[2]}%)`,
                   }}
-                  whileHover={{ scale: 1.2 }}
-                  whileTap={{ scale: 0.9 }}
-                />
-              </motion.div>
-              <motion.input
-                type="range"
-                min="0"
-                max="360"
-                value={hsl[0]}
-                onChange={(e) => handleHueChange(Number(e.target.value))}
-                className="w-full h-3 rounded-full appearance-none cursor-pointer"
-                style={{
-                  background: `linear-gradient(to right, 
+                  onClick={handleSaturationLightnessChange}
+                >
+                  <motion.div
+                    className="w-4 h-4 rounded-full border-2 border-white absolute shadow-md"
+                    style={{
+                      left: `${hsl[1]}%`,
+                      top: `${100 - hsl[2]}%`,
+                      backgroundColor: `hsl(${hsl[0]}, ${hsl[1]}%, ${hsl[2]}%)`,
+                    }}
+                    whileHover={{ scale: 1.2 }}
+                    whileTap={{ scale: 0.9 }}
+                  />
+                </motion.div>
+                <motion.input
+                  type="range"
+                  min="0"
+                  max="360"
+                  value={hsl[0]}
+                  onChange={(e) => handleHueChange(Number(e.target.value))}
+                  className="w-full h-3 rounded-full appearance-none cursor-pointer"
+                  style={{
+                    background: `linear-gradient(to right, 
                 hsl(0, 100%, 50%), hsl(60, 100%, 50%), hsl(120, 100%, 50%), 
                 hsl(180, 100%, 50%), hsl(240, 100%, 50%), hsl(300, 100%, 50%), hsl(360, 100%, 50%)
               )`,
-                }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              />
-              <div className="flex items-center space-x-2">
-                <Label htmlFor="color-input" className="sr-only">
-                  Color
-                </Label>
-                <Input
-                  id="color-input"
-                  type="text"
-                  value={colorInput}
-                  onChange={handleColorInputChange}
-                  className="flex-grow bg-white border border-gray-300 rounded-md text-sm h-8 px-2"
-                  placeholder="#RRGGBB or hsl(h, s%, l%)"
+                  }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 />
-                <motion.div
-                  className="w-8 h-8 rounded-md shadow-sm"
-                  style={{ backgroundColor: colorInput }}
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                />
-              </div>
-              <div className="grid grid-cols-6 gap-2">
-                <AnimatePresence>
-                  {colorPresets.map((preset) => (
-                    <motion.button
-                      key={preset}
-                      className="w-8 h-8 rounded-full relative"
-                      style={{ backgroundColor: preset }}
-                      onClick={() => handleColorChange(preset)}
-                      whileHover={{ scale: 1.2, zIndex: 1 }}
-                      whileTap={{ scale: 0.9 }}
-                    >
-                      {colorInput === preset && (
-                        <motion.div
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          exit={{ scale: 0 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          <Check className="w-4 h-4 text-white absolute inset-0 m-auto" />
-                        </motion.div>
-                      )}
-                    </motion.button>
-                  ))}
-                </AnimatePresence>
-              </div>
-            </motion.div>
+                <div className="flex items-center space-x-2">
+                  <Label htmlFor="color-input" className="sr-only">
+                    Color
+                  </Label>
+                  <Input
+                    id="color-input"
+                    type="text"
+                    value={colorInput}
+                    onChange={handleColorInputChange}
+                    className="flex-grow bg-white border border-gray-300 rounded-md text-sm h-8 px-2"
+                    placeholder="#RRGGBB or hsl(h, s%, l%)"
+                  />
+                  <motion.div
+                    className="w-8 h-8 rounded-md shadow-sm"
+                    style={{ backgroundColor: colorInput }}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                  />
+                </div>
+                <div className="grid grid-cols-6 gap-2">
+                  <AnimatePresence>
+                    {colorPresets.map((preset) => (
+                      <motion.button
+                        key={preset}
+                        className="w-8 h-8 rounded-full relative"
+                        style={{ backgroundColor: preset }}
+                        onClick={() => handleColorChange(preset)}
+                        whileHover={{ scale: 1.2, zIndex: 1 }}
+                        whileTap={{ scale: 0.9 }}
+                      >
+                        {colorInput === preset && (
+                          <motion.div
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            exit={{ scale: 0 }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            <Check className="w-4 h-4 text-white absolute inset-0 m-auto" />
+                          </motion.div>
+                        )}
+                      </motion.button>
+                    ))}
+                  </AnimatePresence>
+                </div>
+              </motion.div>
+            </div>
           </div>
-        </div>
 
-      </TabsContent>
+        </TabsContent>
 
-      <TabsContent value="gradient">
-        <div className="space-y-4">
-          {gradientStops.map((stop, index) => (
-            <div key={index} className="flex items-center space-x-2">
-              <Input
-                type="number"
-                min="0"
-                max="1"
-                step="0.1"
-                value={stop.offset}
-                onChange={(e) => handleGradientStopChange(index, 'offset', e.target.value)}
-              />
-              <Input
-                type="color"
-                value={stop.color}
-                onChange={(e) => handleGradientStopChange(index, 'color', e.target.value)}
-              />
-            </div>
-          ))}
-          <RadioGroup
-            value={gradientDirection}
-            onValueChange={(value: any) => handleDirectionChange(value as 'horizontal' | 'vertical')}
-          >
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="horizontal" id="horizontal" />
-              <Label htmlFor="horizontal">Horizontal</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="vertical" id="vertical" />
-              <Label htmlFor="vertical">Vertical</Label>
-            </div>
-          </RadioGroup>
-        </div>
-      </TabsContent>
+        <TabsContent value="gradient">
+          <div className="space-y-4 w-[240px]">
+            {gradientStops.map((stop, index) => (
+              <div key={index} className="flex items-center space-x-2">
+                <Input
+                  type="number"
+                  min="0"
+                  max="1"
+                  step="0.1"
+                  value={stop.offset}
+                  onChange={(e) => handleGradientStopChange(index, 'offset', e.target.value)}
+                />
+                <Input
+                  type="color"
+                  value={stop.color}
+                  onChange={(e) => handleGradientStopChange(index, 'color', e.target.value)}
+                />
+              </div>
+            ))}
+            <RadioGroup
+              value={gradientDirection}
+              onValueChange={(value: any) => handleDirectionChange(value as 'horizontal' | 'vertical')}
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="horizontal" id="horizontal" />
+                <Label htmlFor="horizontal">Horizontal</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="vertical" id="vertical" />
+                <Label htmlFor="vertical">Vertical</Label>
+              </div>
+            </RadioGroup>
+          </div>
+        </TabsContent>
 
 
-    </Tabs>
+      </Tabs >
+    </div>
   );
 }
