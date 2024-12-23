@@ -37,11 +37,11 @@ import { ColorPicker } from "./editor/color-picker"
 import { GradientStop } from '@/hooks/use-fabric';
 import { isFabricGradient, isGradientColor } from "@/hooks/get-gradient"
 
-interface StrokeSettings {
-  color: string | GradientColor;
-  width: number;
-  enabled: boolean;
-}
+// interface StrokeSettings {
+//   color: string | GradientColor;
+//   width: number;
+//   enabled: boolean;
+// }
 
 
 export interface GradientColor {
@@ -49,6 +49,8 @@ export interface GradientColor {
   direction: 'horizontal' | 'vertical';
   stops: GradientStop[];
 }
+
+
 
 export type Color = string | GradientColor;
 
@@ -78,18 +80,16 @@ interface ToolbarProps {
   showStrokeUI: boolean;
   removeStroke: () => void;
 }
-function getGradientBackground(color: Color): string {
-  if (!isGradientColor(color)) {
-    return typeof color === 'string' ? color : '#000000';
+
+
+const getBackgroundStyle = (color: string | GradientColor): string => {
+  if (typeof color === 'object' && 'stops' in color) {
+    const direction = color.direction === 'horizontal' ? 'to right' : 'to bottom';
+    return `linear-gradient(${direction}, ${color.stops.map(stop => `${stop.color} ${stop.offset * 100}%`).join(', ')
+      })`;
   }
-
-  const stops = isFabricGradient(color) ? color.colorStops : color.stops;
-  return `linear-gradient(${stops.map(stop =>
-    `${stop.color} ${stop.offset * 100}%`
-  ).join(', ')})`;
-}
-
-
+  return color;
+};
 
 
 export function Toolbar({
@@ -320,9 +320,11 @@ export function Toolbar({
                       size={"icon"}
                       className="rounded-full hover:animate-jelly tooltip shrink-0 "
                       style={{
-                        backgroundColor: getGradientBackground(selectedTextProperties.fontColor),
+                        background: getBackgroundStyle(selectedTextProperties.fontColor),
                       }}
-                    >                                      <span className="tooltiptext">Text Color</span>
+
+                    >
+                      <span className="tooltiptext">Text Color</span>
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent
@@ -385,7 +387,7 @@ export function Toolbar({
                             size={"icon"}
                             className="rounded-full hover:animate-jelly tooltip shrink-0 "
                             style={{
-                              backgroundColor: strokeSettings.color,
+                              background: getBackgroundStyle(strokeSettings.color)
                             }}
                           >
                             <span className="tooltiptext">Stroke Color</span>
@@ -395,12 +397,12 @@ export function Toolbar({
                           className="mt-3 w-fit p-0 bg-transparent rounded-lg"
                           align="start"
                         >
-                          {/* <ColorPicker
-                            color={strokeSettings.color}
-                            onChange={(color: string) => {
-                              return updateStrokeColor(color)
-                            }}
-                          /> */}
+
+                          <ColorPicker
+                            color={selectedTextProperties.fontColor}
+                            onChange={(color) => updateStrokeColor(color)}
+                          />
+
                         </PopoverContent>
                       </Popover>
                     </motion.div>

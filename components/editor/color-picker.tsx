@@ -92,22 +92,22 @@ export function ColorPicker({ color, onChange }: ColorPickerProps) {
   const { toast } = useToast();
 
   const [colorInput, setColorInput] = useState(typeof color === 'string' ? color : '');
-
   const [gradientStops, setGradientStops] = useState<GradientStop[]>(() => {
     if (typeof color === 'object' && color.type === 'gradient') {
-      return color.stops.slice(0, 2);
+      return color.stops;
     } else if (typeof color === 'string') {
       return [
-        { offset: 0, color: color },
-        { offset: 1, color: color }
+        { offset: 0, color: '#000000' },
+        { offset: 1, color: '#FFFFFF' }
       ];
     } else {
       return [
-        { offset: 0, color: '#FF0000' },
-        { offset: 1, color: '#0000FF' }
+        { offset: 0, color: '#000000' },
+        { offset: 1, color: '#FFFFFF' }
       ];
     }
   });
+
   const [activeTab, setActiveTab] = useState<'solid' | 'gradient'>(
     typeof color === 'string' || color === undefined ? 'solid' : 'gradient'
   );
@@ -120,15 +120,15 @@ export function ColorPicker({ color, onChange }: ColorPickerProps) {
     if (typeof color === 'string') {
       setColorInput(color);
       setGradientStops([
-        { offset: 0, color: color },
-        { offset: 1, color: color }
+        { offset: 0, color: '#000000' },
+        { offset: 1, color: '#FFFFFF' }
       ]);
     } else if (color && typeof color === 'object' && color.type === 'gradient') {
-      setGradientStops(color.stops.slice(0, 2));
+      setGradientStops(color.stops);
       setGradientDirection(color.direction);
-
     }
   }, [color]);
+
 
 
   const handleHueChange = (hue: number) => {
@@ -162,16 +162,17 @@ export function ColorPicker({ color, onChange }: ColorPickerProps) {
       handleColorChange(newColor);
     }
   };
+
   const handleColorChange = (newColor: string) => {
     setColorInput(newColor);
     onChange(newColor);
   };
-
   const handleGradientChange = (newStops: GradientStop[], direction: 'horizontal' | 'vertical') => {
     setGradientStops(newStops);
     setGradientDirection(direction);
     onChange({ type: 'gradient', stops: newStops, direction });
   };
+
 
   const handleGradientStopChange = (index: number, key: 'offset' | 'color', value: number | string) => {
     const newStops = gradientStops.map((stop, i) => {
@@ -199,6 +200,17 @@ export function ColorPicker({ color, onChange }: ColorPickerProps) {
     handleGradientChange(gradientStops, direction);
   };
 
+  const handleTabChange = (value: string) => {
+    setActiveTab(value as 'solid' | 'gradient');
+    if (value === 'gradient' && typeof color === 'string') {
+      // Set default gradient when switching from solid to gradient
+      handleGradientChange([
+        { offset: 0, color: '#000000' },
+        { offset: 1, color: '#FFFFFF' }
+      ], 'horizontal');
+    }
+  };
+
   const colorPresets = [
     "#FF3B30",
     "#FF9500",
@@ -217,10 +229,10 @@ export function ColorPicker({ color, onChange }: ColorPickerProps) {
   return (
 
     <div className="flex flex-col items-center justify-center bg-white rounded-md shadow-md p-2  ">
-      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'solid' | 'gradient')}>
+      <Tabs value={activeTab} onValueChange={handleTabChange}>
         <TabsList className="flex items-center justify-center">
-          <TabsTrigger value="solid" className="w-full">Solid</TabsTrigger>
-          <TabsTrigger value="gradient" className="w-full">Gradient</TabsTrigger>
+          <TabsTrigger value="solid" className="w-full">🎨</TabsTrigger>
+          <TabsTrigger value="gradient" className="w-full">🌈</TabsTrigger>
         </TabsList>
         <TabsContent value="solid">
           <div>
@@ -278,7 +290,7 @@ export function ColorPicker({ color, onChange }: ColorPickerProps) {
                     id="color-input"
                     type="text"
                     value={colorInput}
-                    onChange={handleColorInputChange}
+                    onChange={(e) => handleColorChange(e.target.value)}
                     className="flex-grow bg-white border border-gray-300 rounded-md text-sm h-8 px-2"
                     placeholder="#RRGGBB or hsl(h, s%, l%)"
                   />
@@ -321,7 +333,7 @@ export function ColorPicker({ color, onChange }: ColorPickerProps) {
         </TabsContent>
 
         <TabsContent value="gradient">
-          <div className="space-y-4 w-[240px]">
+          <div className="space-y-4 min-w-40">
             {gradientStops.map((stop, index) => (
               <div key={index} className="flex items-center space-x-2">
                 <Input
@@ -341,7 +353,7 @@ export function ColorPicker({ color, onChange }: ColorPickerProps) {
             ))}
             <RadioGroup
               value={gradientDirection}
-              onValueChange={(value: any) => handleDirectionChange(value as 'horizontal' | 'vertical')}
+              onValueChange={(value) => handleDirectionChange(value as 'horizontal' | 'vertical')}
             >
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="horizontal" id="horizontal" />
@@ -354,6 +366,7 @@ export function ColorPicker({ color, onChange }: ColorPickerProps) {
             </RadioGroup>
           </div>
         </TabsContent>
+
 
 
       </Tabs >

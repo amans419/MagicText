@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react"
+import React, { useCallback, useEffect, useRef, useState } from "react"
 import { Canvas, FabricImage, PencilBrush } from "fabric"
 import * as fabric from "fabric"
 import { useWindow } from "@/hooks/use-window"
@@ -34,11 +34,6 @@ interface TextStrokeSettings {
   hasStroke: boolean;
 }
 
-export interface selectedTextPropertiesProps {
-  fontFamily: string
-  fontColor: string
-  isTextSelected: boolean
-}
 
 export interface DrawingPropertiesProps {
   isDrawing: boolean
@@ -47,7 +42,14 @@ export interface DrawingPropertiesProps {
 }
 
 export interface strokeSettingsProps {
-  color: string;
+  color: string | GradientColor;
+  width: number;
+  enabled: boolean;
+}
+
+
+interface StrokeSettings {
+  color: ColorProps;
   width: number;
   enabled: boolean;
 }
@@ -84,7 +86,14 @@ interface GradientColor {
 }
 
 export type GradientColors = FabricGradient | CustomGradient;
+
 export type ColorProps = string | GradientColor;
+
+export interface selectedTextPropertiesProps {
+  fontFamily: string
+  fontColor: ColorProps
+  isTextSelected: boolean
+}
 
 
 export function useFabric() {
@@ -113,7 +122,7 @@ export function useFabric() {
   const { isMobile, windowSize } = useWindow()
   const [showStrokeUI, setShowStrokeUI] = useState(false);
 
-  const [strokeSettings, setStrokeSettings] = useState({
+  const [strokeSettings, setStrokeSettings] = useState<StrokeSettings>({
     color: '#000000',
     width: 1.5,
     enabled: false
@@ -191,17 +200,33 @@ export function useFabric() {
 
 
       if (activeObject && activeObject.type === "textbox") {
+        const text = activeObject as fabric.Textbox;
+        const fill = text.get("fill");
+
+        let fontColor: ColorProps;
+        if (typeof fill === 'string') {
+          fontColor = fill;
+        } else if (fill instanceof fabric.Gradient) {
+          fontColor = {
+            type: 'gradient',
+            stops: fill.colorStops.map(stop => ({ offset: stop.offset, color: stop.color })),
+            direction: fill.coords.x2 === 1 ? 'horizontal' : 'vertical'
+          };
+        } else {
+          fontColor = '#000000'; // Default color if fill is neither string nor gradient
+        }
+
         setSelectedTextProperties({
-          fontFamily: activeObject.get("fontFamily") as string,
-          fontColor: activeObject.get("fill") as string,
+          fontFamily: text.get("fontFamily") as string,
+          fontColor: fontColor,
           isTextSelected: true,
-        })
+        });
       } else {
         setSelectedTextProperties({
           fontFamily: DEFAULT_FONT_FAMILY,
           fontColor: DEFAULT_FONT_COLOR,
           isTextSelected: false,
-        })
+        });
       }
 
       if (activeObject) {
@@ -466,7 +491,7 @@ export function useFabric() {
 
       setStrokeSettings(prev => ({
         ...prev,
-        color: typeof color === 'string' ? color : 'gradient',
+        color: color,
         enabled: true
       }));
 
@@ -482,7 +507,7 @@ export function useFabric() {
 
       setStrokeSettings(prev => {
         let newWidth = prev.width + 0.5;
-        if (newWidth > 5) {
+        if (newWidth > 6) {
           newWidth = 0.5;
         }
 
@@ -498,7 +523,8 @@ export function useFabric() {
     }
   }
 
-  function changeTextColor(color: ColorProps) {
+
+  const changeTextColor = useCallback((color: ColorProps) => {
     if (!canvas) return;
 
     const activeObject = canvas.getActiveObject();
@@ -508,9 +534,7 @@ export function useFabric() {
       if (typeof color === 'string') {
         text.set("fill", color);
       } else if (color.type === 'gradient') {
-        // Validate gradient stops
         const validStops = color.stops.filter(stop => stop.offset >= 0 && stop.offset <= 1);
-
         if (validStops.length !== color.stops.length) {
           toast({
             variant: "destructive",
@@ -524,8 +548,7 @@ export function useFabric() {
             variant: "destructive",
             title: "Invalid Gradient Value",
             description: "Not enough valid gradient stops. Using default gradient.",
-          });
-          validStops.push({ offset: 0, color: '#FF0000' }, { offset: 1, color: '#0000FF' });
+          }); validStops.push({ offset: 0, color: '#000000' }, { offset: 1, color: '#FFFFFF' });
         }
 
         const coords = color.direction === 'horizontal'
@@ -543,12 +566,14 @@ export function useFabric() {
 
       setSelectedTextProperties((prev) => ({
         ...prev,
-        fontColor: typeof color === 'string' ? color : 'gradient'
+        fontColor: color
       }));
 
       canvas.renderAll();
     }
-  }
+  }, [canvas]);
+
+
 
   // Add inside useFabric() function
   async function handleImageUpload(file: File): Promise<void> {
