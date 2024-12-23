@@ -36,6 +36,7 @@ import { AnimatePresence, motion } from "framer-motion"
 import { ColorPicker } from "./editor/color-picker"
 import { GradientStop } from '@/hooks/use-fabric';
 import { isFabricGradient, isGradientColor } from "@/hooks/get-gradient"
+import { set } from "zod"
 
 // interface StrokeSettings {
 //   color: string | GradientColor;
@@ -79,6 +80,8 @@ interface ToolbarProps {
   updateStrokeColor: (color: ColorProps) => void;
   showStrokeUI: boolean;
   removeStroke: () => void;
+  showDuplicateStroke: boolean;
+  setShowDuplicateStroke: (show: boolean) => void;
 }
 
 
@@ -101,6 +104,7 @@ export function Toolbar({
   downloadCanvas,
   selectedTextProperties,
   toggleFilter,
+  showDuplicateStroke,
   isImageSelected,
   toggleDrawingMode,
   incrementBrushSize,
@@ -111,7 +115,8 @@ export function Toolbar({
   updateStrokeColor,
   strokeSettings,
   showStrokeUI,
-  removeStroke
+  removeStroke,
+  setShowDuplicateStroke
 }: ToolbarProps) {
   const {
     handleImageUpload,
@@ -380,6 +385,24 @@ export function Toolbar({
 
                         </Button>
                       </div>
+
+                      <div>
+                        <Button
+                          variant="outline"
+                          size={"icon"}
+                          className="rounded-full hover:animate-jelly tooltip shrink-0 "
+                          onClick={() => {
+                            setShowDuplicateStroke(!showDuplicateStroke);
+                            console.log("Show Duplicate Stroke", showDuplicateStroke);
+                          }}
+                        >
+                          <span className="tooltiptext">Stroke Upward</span>
+                          k
+                        </Button>
+                      </div>
+
+
+
                       <Popover>
                         <PopoverTrigger asChild>
                           <Button
@@ -509,7 +532,7 @@ export function Toolbar({
             </div>
           )}
         </div>
-      </div>
-    </div>
+      </div >
+    </div >
   )
 }

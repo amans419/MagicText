@@ -381,9 +381,7 @@ export function useFabric() {
     // Add text first
     canvas.add(text)
 
-    if (showDuplicateStroke) {
-      strokeUpward(text);
-    }
+    setShowDuplicateStroke(false); // Reset duplicate stroke state
 
     canvas.setActiveObject(text)
     canvas.sendObjectToBack(text)
@@ -394,6 +392,17 @@ export function useFabric() {
 
   function strokeUpward(originalText: ExtendedTextbox) {
     if (!canvas) return;
+
+
+    const existingPair = Array.from(textPairs.values())
+      .find(pair => pair.original.customId === originalText.customId);
+
+    if (existingPair?.duplicate) {
+      canvas.remove(existingPair.duplicate);
+      const updatedPairs = new Map(textPairs);
+      updatedPairs.delete(originalText.customId!);
+      setTextPairs(updatedPairs);
+    }
 
 
     const textId = generateUniqueId();
@@ -413,116 +422,137 @@ export function useFabric() {
       });
     }
 
-    const duplicate = new fabric.Textbox(originalText.text, {
-      left: originalText.left,
-      top: originalText.top,
-      width: originalText.width,
-      height: originalText.height,
-      fontSize: originalText.fontSize,
-      fontFamily: originalText.fontFamily,
-      textAlign: originalText.textAlign,
-      originX: originalText.originX,
-      originY: originalText.originY,
-      fill: 'transparent',
-      stroke: strokeValue,
-      strokeWidth: strokeSettings.width || 1.5,
-      selectable: false,
-      evented: false,
-      hasControls: false,
-      hasBorders: true,
-      padding: originalText.padding,
-      splitByGrapheme: false,
-      lockUniScaling: true,
-      centeredScaling: true,
-      angle: originalText.angle,
-      scaleX: originalText.scaleX,
-      scaleY: originalText.scaleY,
-      visible: true // Ensure visibility
+    if (showDuplicateStroke) {
+
+      const duplicate = new fabric.Textbox(originalText.text, {
+        left: originalText.left,
+        top: originalText.top,
+        width: originalText.width,
+        height: originalText.height,
+        fontSize: originalText.fontSize,
+        fontFamily: originalText.fontFamily,
+        textAlign: originalText.textAlign,
+        originX: originalText.originX,
+        originY: originalText.originY,
+        fill: 'transparent',
+        stroke: strokeValue,
+        strokeWidth: strokeSettings.width || 1.5,
+        selectable: false,
+        evented: false,
+        hasControls: false,
+        hasBorders: true,
+        padding: originalText.padding,
+        splitByGrapheme: false,
+        lockUniScaling: true,
+        centeredScaling: true,
+        angle: originalText.angle,
+        scaleX: originalText.scaleX,
+        scaleY: originalText.scaleY,
+        visible: true // Ensure visibility
 
 
-    }) as ExtendedTextbox;
+      }) as ExtendedTextbox;
 
-    duplicate.customId = `${textId}-duplicate`;
-
-
-    duplicate.customId = `${textId}-duplicate`;
-
-    const updateDuplicate = () => {
-      if (duplicate && canvas) {
-        const currentStroke = duplicate.stroke;
-        const currentStrokeWidth = duplicate.strokeWidth;
+      duplicate.customId = `${textId}-duplicate`;
 
 
-        duplicate.set({
-          text: originalText.text,
-          left: originalText.left,
-          top: originalText.top,
-          scaleX: originalText.scaleX,
-          scaleY: originalText.scaleY,
-          width: originalText.width,
-          height: originalText.height,
-          angle: originalText.angle,
-          fontSize: originalText.fontSize,
-          fontFamily: originalText.fontFamily,
-          stroke: currentStroke, // Copy fill as stroke
-          strokeWidth: currentStrokeWidth || 1.5,
-          charSpacing: originalText.charSpacing,
-          lineHeight: originalText.lineHeight,
-          textAlign: originalText.textAlign,
-          fill: 'transparent',
-        });
-        canvas.bringObjectToFront(duplicate);
-        canvas.renderAll();
-      }
-    };
+      duplicate.customId = `${textId}-duplicate`;
+
+      const updateDuplicate = () => {
+        if (duplicate && canvas) {
+          const currentStroke = duplicate.stroke;
+          const currentStrokeWidth = duplicate.strokeWidth;
 
 
-    // Event listeners
-    originalText.on('moving', updateDuplicate);
-    originalText.on('scaling', updateDuplicate);
-    originalText.on('modified', updateDuplicate);
-    originalText.on('changed', updateDuplicate);
-    originalText.on('rotating', updateDuplicate);
-
-    canvas.on('object:modified', (e) => {
-      const target = e.target as ExtendedObject;
-      if (target && target.customId === textId) {
-        updateDuplicate();
-      }
-    });
-
-    // Track text pairs
-    const newPairs = new Map<string, TextPair>();
-    newPairs.set(textId, {
-      original: originalText,
-      duplicate: duplicate
-    });
-
-    setTextPairs(newPairs);
-
-    canvas.add(duplicate);
-    canvas.bringObjectToFront(duplicate);
-    canvas.renderAll();
+          duplicate.set({
+            text: originalText.text,
+            left: originalText.left,
+            top: originalText.top,
+            scaleX: originalText.scaleX,
+            scaleY: originalText.scaleY,
+            width: originalText.width,
+            height: originalText.height,
+            angle: originalText.angle,
+            fontSize: originalText.fontSize,
+            fontFamily: originalText.fontFamily,
+            stroke: currentStroke, // Copy fill as stroke
+            strokeWidth: currentStrokeWidth || 1.5,
+            charSpacing: originalText.charSpacing,
+            lineHeight: originalText.lineHeight,
+            textAlign: originalText.textAlign,
+            fill: 'transparent',
+          });
+          canvas.bringObjectToFront(duplicate);
+          canvas.renderAll();
+        }
+      };
 
 
-    // const objects = canvas.getObjects();
-    // const originalIndex = objects.indexOf(originalText);
-    // canvas.bringObjectToFront(duplicate);
-    // objects.forEach((obj, index) => {
-    //   if (index > originalIndex + 1) {
-    //     canvas.bringObjectToFront(obj);
-    //   }
+      // Event listeners
+      originalText.on('moving', updateDuplicate);
+      originalText.on('scaling', updateDuplicate);
+      originalText.on('modified', updateDuplicate);
+      originalText.on('changed', updateDuplicate);
+      originalText.on('rotating', updateDuplicate);
 
-    // Cleanup when original is removed
-    originalText.on('removed', () => {
-      if (canvas && duplicate) {
-        canvas.remove(duplicate);
-        const updatedPairs = new Map(textPairs);
-        updatedPairs.delete(textId);
-        setTextPairs(updatedPairs);
-      }
-    });
+      canvas.on('object:modified', (e) => {
+        const target = e.target as ExtendedObject;
+        if (target && target.customId === textId) {
+          updateDuplicate();
+        }
+      });
+
+      // Track text pairs
+      const newPairs = new Map<string, TextPair>();
+      newPairs.set(textId, {
+        original: originalText,
+        duplicate: duplicate
+      });
+
+      setTextPairs(newPairs);
+
+      canvas.add(duplicate);
+      canvas.bringObjectToFront(duplicate);
+      canvas.renderAll();
+
+
+      // const objects = canvas.getObjects();
+      // const originalIndex = objects.indexOf(originalText);
+      // canvas.bringObjectToFront(duplicate);
+      // objects.forEach((obj, index) => {
+      //   if (index > originalIndex + 1) {
+      //     canvas.bringObjectToFront(obj);
+      //   }
+
+      // Cleanup when original is removed
+      originalText.on('removed', () => {
+        if (canvas && duplicate) {
+          canvas.remove(duplicate);
+          const updatedPairs = new Map(textPairs);
+          updatedPairs.delete(textId);
+          setTextPairs(updatedPairs);
+        }
+      });
+    }
   }
+
+  useEffect(() => {
+    if (!showDuplicateStroke) {
+      // Remove all duplicates when turning off
+      textPairs.forEach(pair => {
+        if (canvas && pair.duplicate) {
+          canvas.remove(pair.duplicate);
+        }
+      });
+      setTextPairs(new Map());
+    } else {
+      // Create duplicate for active object when turning on
+      const activeObject = canvas?.getActiveObject();
+      if (activeObject && activeObject.type === "textbox") {
+        strokeUpward(activeObject as ExtendedTextbox);
+      }
+    }
+  }, [showDuplicateStroke]);
 
 
   function changeFontFamily(fontFamily: string) {
@@ -1034,6 +1064,7 @@ export function useFabric() {
     isObjectSelected,
     updateStrokeColor,
     updateStrokeWidth,
+    showDuplicateStroke,
     setShowDuplicateStroke,
   }
 }

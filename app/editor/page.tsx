@@ -46,7 +46,9 @@ const EditorPage: React.FC = () => {
     updateStrokeWidth,
     strokeSettings,
     showStrokeUI,
-    removeStroke
+    setShowDuplicateStroke,
+    removeStroke,
+    showDuplicateStroke
   } = useFabric();
 
   const handleUploadImage = () => {
@@ -115,7 +117,9 @@ const EditorPage: React.FC = () => {
           />
           <div className="absolute bottom-[calc(5rem)] left-0 right-0 w-full flex items-center justify-center">
             <Toolbar
+              showDuplicateStroke={showDuplicateStroke}
               removeStroke={removeStroke}
+              setShowDuplicateStroke={setShowDuplicateStroke}
               showStrokeUI={showStrokeUI}
               strokeSettings={strokeSettings}
               updateStrokeColor={updateStrokeColor}
