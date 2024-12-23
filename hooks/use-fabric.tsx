@@ -95,7 +95,21 @@ export interface selectedTextPropertiesProps {
   isTextSelected: boolean
 }
 
+function generateUniqueId(): string {
+  return Math.random().toString(36).substr(2, 9);
+}
+interface ExtendedObject extends fabric.Object {
+  customId?: string;
+}
 
+
+interface ExtendedTextbox extends fabric.Textbox {
+  customId?: string;
+}
+interface TextPair {
+  original: ExtendedTextbox;
+  duplicate: ExtendedTextbox;
+}
 export function useFabric() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [canvas, setCanvas] = useState<Canvas | null>(null)
@@ -121,6 +135,8 @@ export function useFabric() {
   const [currentFilterIndex, setCurrentFilterIndex] = useState<number>(0)
   const { isMobile, windowSize } = useWindow()
   const [showStrokeUI, setShowStrokeUI] = useState(false);
+  const [textPairs, setTextPairs] = useState<Map<string, TextPair>>(new Map());
+  const [showDuplicateStroke, setShowDuplicateStroke] = useState(false);
 
   const [strokeSettings, setStrokeSettings] = useState<StrokeSettings>({
     color: '#000000',
@@ -365,12 +381,147 @@ export function useFabric() {
     // Add text first
     canvas.add(text)
 
-    // If we have a removed background layer, ensure proper ordering
+    if (showDuplicateStroke) {
+      strokeUpward(text);
+    }
 
     canvas.setActiveObject(text)
     canvas.sendObjectToBack(text)
 
     canvas.renderAll()
+  }
+
+
+  function strokeUpward(originalText: ExtendedTextbox) {
+    if (!canvas) return;
+
+
+    const textId = generateUniqueId();
+    originalText.customId = textId;
+
+    let strokeValue: string | fabric.Pattern | fabric.Gradient<"linear">;
+    if (typeof strokeSettings.color === 'string') {
+      strokeValue = strokeSettings.color;
+    } else {
+      strokeValue = new fabric.Gradient<"linear">({
+        type: 'linear',
+        gradientUnits: 'percentage',
+        coords: strokeSettings.color.direction === 'horizontal'
+          ? { x1: 0, y1: 0, x2: 1, y2: 0 }
+          : { x1: 0, y1: 0, x2: 0, y2: 1 },
+        colorStops: strokeSettings.color.stops.map(stop => ({ ...stop, opacity: 1 }))
+      });
+    }
+
+    const duplicate = new fabric.Textbox(originalText.text, {
+      left: originalText.left,
+      top: originalText.top,
+      width: originalText.width,
+      height: originalText.height,
+      fontSize: originalText.fontSize,
+      fontFamily: originalText.fontFamily,
+      textAlign: originalText.textAlign,
+      originX: originalText.originX,
+      originY: originalText.originY,
+      fill: 'transparent',
+      stroke: strokeValue,
+      strokeWidth: strokeSettings.width || 1.5,
+      selectable: false,
+      evented: false,
+      hasControls: false,
+      hasBorders: true,
+      padding: originalText.padding,
+      splitByGrapheme: false,
+      lockUniScaling: true,
+      centeredScaling: true,
+      angle: originalText.angle,
+      scaleX: originalText.scaleX,
+      scaleY: originalText.scaleY,
+      visible: true // Ensure visibility
+
+
+    }) as ExtendedTextbox;
+
+    duplicate.customId = `${textId}-duplicate`;
+
+
+    duplicate.customId = `${textId}-duplicate`;
+
+    const updateDuplicate = () => {
+      if (duplicate && canvas) {
+        const currentStroke = duplicate.stroke;
+        const currentStrokeWidth = duplicate.strokeWidth;
+
+
+        duplicate.set({
+          text: originalText.text,
+          left: originalText.left,
+          top: originalText.top,
+          scaleX: originalText.scaleX,
+          scaleY: originalText.scaleY,
+          width: originalText.width,
+          height: originalText.height,
+          angle: originalText.angle,
+          fontSize: originalText.fontSize,
+          fontFamily: originalText.fontFamily,
+          stroke: currentStroke, // Copy fill as stroke
+          strokeWidth: currentStrokeWidth || 1.5,
+          charSpacing: originalText.charSpacing,
+          lineHeight: originalText.lineHeight,
+          textAlign: originalText.textAlign,
+          fill: 'transparent',
+        });
+        canvas.bringObjectToFront(duplicate);
+        canvas.renderAll();
+      }
+    };
+
+
+    // Event listeners
+    originalText.on('moving', updateDuplicate);
+    originalText.on('scaling', updateDuplicate);
+    originalText.on('modified', updateDuplicate);
+    originalText.on('changed', updateDuplicate);
+    originalText.on('rotating', updateDuplicate);
+
+    canvas.on('object:modified', (e) => {
+      const target = e.target as ExtendedObject;
+      if (target && target.customId === textId) {
+        updateDuplicate();
+      }
+    });
+
+    // Track text pairs
+    const newPairs = new Map<string, TextPair>();
+    newPairs.set(textId, {
+      original: originalText,
+      duplicate: duplicate
+    });
+
+    setTextPairs(newPairs);
+
+    canvas.add(duplicate);
+    canvas.bringObjectToFront(duplicate);
+    canvas.renderAll();
+
+
+    // const objects = canvas.getObjects();
+    // const originalIndex = objects.indexOf(originalText);
+    // canvas.bringObjectToFront(duplicate);
+    // objects.forEach((obj, index) => {
+    //   if (index > originalIndex + 1) {
+    //     canvas.bringObjectToFront(obj);
+    //   }
+
+    // Cleanup when original is removed
+    originalText.on('removed', () => {
+      if (canvas && duplicate) {
+        canvas.remove(duplicate);
+        const updatedPairs = new Map(textPairs);
+        updatedPairs.delete(textId);
+        setTextPairs(updatedPairs);
+      }
+    });
   }
 
 
@@ -446,12 +597,14 @@ export function useFabric() {
   }
 
 
+
+
   function updateStrokeColor(color: ColorProps) {
     if (!canvas) return;
 
     const activeObject = canvas.getActiveObject();
     if (activeObject && activeObject.type === "textbox") {
-      const text = activeObject as fabric.Textbox;
+      const text = activeObject as ExtendedTextbox;
 
       if (typeof color === 'string') {
         text.set("stroke", color);
@@ -489,6 +642,36 @@ export function useFabric() {
         text.set("stroke", gradient);
       }
 
+      if (showDuplicateStroke) {
+        const pair = Array.from(textPairs.values())
+          .find(p => p.original.customId === text.customId);
+
+        if (pair?.duplicate) {
+          if (typeof color === 'string') {
+            pair.duplicate.set({
+              stroke: color,
+              strokeWidth: text.strokeWidth || 1.5,
+              fill: 'transparent'
+            });
+          } else if (color.type === 'gradient') {
+            const duplicateGradient = new fabric.Gradient({
+              type: 'linear',
+              gradientUnits: 'percentage',
+              coords: color.direction === 'horizontal'
+                ? { x1: 0, y1: 0, x2: 1, y2: 0 }
+                : { x1: 0, y1: 0, x2: 0, y2: 1 },
+              colorStops: color.stops.map(stop => ({ ...stop, opacity: 1 }))
+            });
+            pair.duplicate.set({
+              stroke: duplicateGradient,
+              strokeWidth: text.strokeWidth || 1.5,
+              fill: 'transparent'
+            });
+          }
+        }
+      }
+
+
       setStrokeSettings(prev => ({
         ...prev,
         color: color,
@@ -503,7 +686,7 @@ export function useFabric() {
 
     const activeObject = canvas.getActiveObject();
     if (activeObject && activeObject.type === "textbox") {
-      const text = activeObject as fabric.Textbox;
+      const text = activeObject as ExtendedTextbox;
 
       setStrokeSettings(prev => {
         let newWidth = prev.width + 0.5;
@@ -512,6 +695,19 @@ export function useFabric() {
         }
 
         text.set("strokeWidth", newWidth);
+
+        if (showDuplicateStroke) {
+          const pair = Array.from(textPairs.values())
+            .find(p => p.original.customId === text.customId);
+
+          if (pair?.duplicate) {
+            pair.duplicate.set({
+              strokeWidth: text.strokeWidth
+            });
+          }
+        }
+
+
         canvas.renderAll();
 
         return {
@@ -837,6 +1033,7 @@ export function useFabric() {
     handleImageUpload,
     isObjectSelected,
     updateStrokeColor,
-    updateStrokeWidth
+    updateStrokeWidth,
+    setShowDuplicateStroke,
   }
 }
