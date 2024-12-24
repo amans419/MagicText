@@ -66,9 +66,9 @@ const EditorPage: React.FC = () => {
     }
   }, [handleImageUpload]);
 
-  // if (!user || !session || !session.user) {
-  //   return <Authenticate />;
-  // }
+  if (!user || !session || !session.user) {
+    return <Authenticate />;
+  }
 
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)]">

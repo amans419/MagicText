@@ -4,6 +4,7 @@ import { memo, useState } from "react"
 import { motion, useAnimation, useMotionValue } from "framer-motion"
 import serenity from '@/public/serenity.jpg';
 
+
 const colors = [
     "bg-gray-100",
     "bg-yellow-100",
@@ -16,15 +17,16 @@ const colors = [
 ]
 
 
-const images = [
-    serenity,
-    serenity,
-    serenity,
-    serenity,
-    serenity,
-    serenity,
-    serenity,
-    serenity,
+
+const cardImages = [
+    "/serenity.jpg",
+    "/roar.jpg",
+    "/speed.jpg",
+    "/thirsty.jpg",
+    "/ride.png",
+    "/life.png",
+    "/bear.png",
+
 ];
 
 const Carousel = memo(() => {
@@ -84,15 +86,16 @@ const Carousel = memo(() => {
                     }}
                     animate={controls}
                 >
-                    {colors.map((color, i) => {
+                    {cardImages.map((imgUrl, i) => {
                         const isCurrentPage = i === currentPage
                         const hasPassedPage = i < currentPage
                         const zIndex = colors.length - Math.abs(currentPage - i)
 
                         return (
                             <motion.div
-                                key={`${color}-${i}`}
-                                className={`absolute ${color} rounded-2xl`}
+                                key={i}
+
+                                className={`absolute  rounded-2xl`}
                                 style={{
                                     width: cardWidth,
                                     height: cardHeight,
@@ -102,13 +105,14 @@ const Carousel = memo(() => {
                     translateZ(${(i - currentPage) * pageGap}px)
                     rotateY(${hasPassedPage ? -180 : 0}deg)
                   `,
+
                                     transformOrigin: "left center",
                                     zIndex,
                                     backfaceVisibility: "hidden",
 
-                                    backgroundImage: 'url("/serenity.jpg")',
-                                    backgroundSize: 'cover',
-                                    backgroundPosition: 'center',
+                                    backgroundImage: `url(${imgUrl})`,
+                                    backgroundSize: "cover",
+                                    backgroundPosition: "center"
 
                                 }}
                                 animate={{
@@ -119,12 +123,32 @@ const Carousel = memo(() => {
                                         ease: [0.4, 0, 0.2, 1],
                                     },
                                 }}
+
+                                onDragEnd={(event, info) => {
+                                    console.log("offset.x:", info.offset.x)
+
+                                    // Swiped left
+                                    if (info.offset.x < -100) {
+                                        if (currentPage >= cardImages.length - 1) {
+                                            setCurrentPage(0)
+                                        } else {
+                                            setCurrentPage(currentPage + 1)
+                                        }
+                                        // Swiped right
+                                    } else if (info.offset.x > 100) {
+                                        if (currentPage <= 0) {
+                                            setCurrentPage(cardImages.length - 1)
+                                        } else {
+                                            setCurrentPage(currentPage - 1)
+                                        }
+                                    }
+
+                                    // reset drag so next swipe is consistent
+                                    dragX.set(0)
+                                }}
                             >
                                 <div className="relative h-full w-full rounded-xl ">
                                     {/* Front of page */}
-                                    <div className="absolute inset-0 flex items-center justify-center text-2xl font-bold text-gray-700">
-                                        {i + 1}
-                                    </div>
 
                                     {/* Back of page */}
                                     <div
@@ -132,7 +156,6 @@ const Carousel = memo(() => {
                                         style={{
                                             transform: "rotateY(180deg)",
                                             backfaceVisibility: "hidden",
-                                            backgroundColor: color,
                                         }}
                                     >
                                         Back {i + 1}
