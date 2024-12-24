@@ -2,6 +2,7 @@
 
 import { memo, useState } from "react"
 import { motion, useAnimation, useMotionValue } from "framer-motion"
+import serenity from '@/public/serenity.jpg';
 
 const colors = [
     "bg-gray-100",
@@ -13,6 +14,18 @@ const colors = [
     "bg-orange-100",
     "bg-teal-100",
 ]
+
+
+const images = [
+    serenity,
+    serenity,
+    serenity,
+    serenity,
+    serenity,
+    serenity,
+    serenity,
+    serenity,
+];
 
 const Carousel = memo(() => {
     const [currentPage, setCurrentPage] = useState(0)
@@ -92,6 +105,11 @@ const Carousel = memo(() => {
                                     transformOrigin: "left center",
                                     zIndex,
                                     backfaceVisibility: "hidden",
+
+                                    backgroundImage: 'url("/serenity.jpg")',
+                                    backgroundSize: 'cover',
+                                    backgroundPosition: 'center',
+
                                 }}
                                 animate={{
                                     rotateY: hasPassedPage ? -180 : 0,
@@ -138,7 +156,7 @@ const Carousel = memo(() => {
             <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-sm text-gray-500">
                 Swipe to turn pages
             </div>
-        </div>
+        </div >
     )
 })
 
