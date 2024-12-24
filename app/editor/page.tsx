@@ -8,13 +8,14 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { ReloadIcon } from "@radix-ui/react-icons";
 import { Progress } from "@/components/ui/progress";
-import { BadgePlus } from 'lucide-react';
+import { BadgePlus, Files, FileText, Images, Link } from 'lucide-react';
 import { useFabric } from "@/hooks/use-fabric";
 import { Toolbar } from "@/components/toolbar"
 import ImageRender from "@/components/image-render"
 
 import "@/app/fonts.css"
-import AnimatedProgress from "@/components/AnimatedProgress";
+import AnimatedProgress from "@/components/animated-progrss";
+import { EmptyState } from "@/components/empty-state";
 
 const EditorPage: React.FC = () => {
   const { user } = useUser();
@@ -86,21 +87,21 @@ const EditorPage: React.FC = () => {
       <Separator />
 
       <div className="flex-grow flex items-center justify-center">
-        {/* Upload button */}
-        <div className={`text-center ${!isLoading && !canvasReady ? 'block' : 'hidden'}`}>
-          <Button
-            onClick={handleUploadImage}
-            disabled={isLoading}
-            className="px-4 py-2 rounded-lg max-sm:px-6 max-sm:py-6 text-lg mb-4"
-          >
-            <BadgePlus className="mr-2 h-5 w-5" />
-            Create Design
-          </Button>
-          <h2 className="text-xl px-4 align-middle font-semibold">
-            Welcome,
-            <br /> get started by uploading an image!
-          </h2>
+        <div className={`text-center m-6  ${!isLoading && !canvasReady ? 'block' : 'hidden'}`}>
+
+          <EmptyState
+            title="Welcome"
+            description="Get started by uploading an image!"
+            onFileChange={onFileChange}
+            icons={[FileText, Images, Files]}
+            action={{
+              label: "Upload Image",
+              onClick: () => { handleUploadImage }
+            }}
+          />
         </div>
+        {/* Upload button */}
+
 
         {/* Progress */}
         <div className={`${isLoading ? 'flex' : 'hidden'} flex-col items-center justify-center`}>

@@ -7,7 +7,7 @@ import { removeBackground } from "@imgly/background-removal";
 import { useToast } from "@/hooks/use-toast";
 
 const CANVAS_DIMENSIONS = { default: 500, mobileMultiplier: 0.9 }
-const DEFAULT_BACKGROUND_COLOR = "#005DFF"
+const DEFAULT_BACKGROUND_COLOR = "transparent"
 const DEFAULT_FONT_COLOR = "#ffffff"
 const DEFAULT_FONT_FAMILY = "Shrikhand"
 const DEFAULT_TEXT_OPTIONS = {

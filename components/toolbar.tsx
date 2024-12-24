@@ -33,7 +33,7 @@ import {
   useFabric,
 } from "@/hooks/use-fabric"
 import { AnimatePresence, motion } from "framer-motion"
-import { ColorPicker } from "./editor/color-picker"
+import { ColorPicker } from "./color-picker"
 import { GradientStop } from '@/hooks/use-fabric';
 import { isFabricGradient, isGradientColor } from "@/hooks/get-gradient"
 import { set } from "zod"
@@ -154,58 +154,8 @@ export function Toolbar({
 
   return (
     <div className="max-w-[100vw] px-5">
-      <div className="no-scrollbar w-full overflow-x-auto rounded-full border bg-white sm:overflow-visible">
-        <div className="flex items-center space-x-2 p-2 text-2xl md:justify-center">
-          {/* <Button
-            {...getRootProps()}
-            variant="outline"
-            size={"icon"}
-            className="rounded-full hover:animate-jelly tooltip shrink-0"
-          >
-            <span className="tooltiptext">Background</span>
-            <input {...getInputProps()} />
-            <Icons.background className="size-4" />
-          </Button> */}
-
-          {/* <div className="h-5">
-            <div className="mx-1.5 h-full w-px bg-[#e5e5e5]"></div>
-          </div> */}
-
-          {/* <AnimatePresence>
-            {isImageSelected && (
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20, transition: { duration: 0.09 } }}
-                transition={{
-                  duration: 0.1,
-                  stiffness: 900,
-                  type: "spring",
-                  damping: 50,
-                }}
-                className="flex items-center space-x-2"
-              >
-                <Button
-                  onClick={() => flipImage("horizontal")}
-                  variant="outline"
-                  size={"icon"}
-                  className="rounded-full hover:animate-jelly tooltip shrink-0"
-                >
-                  <span className="tooltiptext">Flip</span>
-                  <Icons.flip className="size-4" />
-                </Button>
-                <Button
-                  onClick={() => toggleFilter()}
-                  variant="outline"
-                  size={"icon"}
-                  className="rounded-full hover:animate-jelly tooltip shrink-0 "
-                >
-                  <Icons.filters className="size-4" />
-                  <span className="tooltiptext">Filters</span>
-                </Button>
-              </motion.div>
-            )}
-          </AnimatePresence> */}
+      <div className="no-scrollbar w-full overflow-x-auto rounded-xl border bg-white sm:overflow-visible">
+        <div className="flex items-center space-x-2 p-2 px-3 text-2xl md:justify-center">
 
           <Button
             onClick={addText}
