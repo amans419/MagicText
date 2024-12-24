@@ -16,6 +16,7 @@ import ImageRender from "@/components/image-render"
 import "@/app/fonts.css"
 import AnimatedProgress from "@/components/animated-progrss";
 import { EmptyState } from "@/components/empty-state";
+import Authenticate from "@/components/authenticate";
 
 const EditorPage: React.FC = () => {
   const { user } = useUser();
@@ -64,6 +65,10 @@ const EditorPage: React.FC = () => {
       handleImageUpload(file);
     }
   }, [handleImageUpload]);
+
+  if (!user || !session || !session.user) {
+    return <Authenticate />;
+  }
 
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)]">

@@ -25,9 +25,9 @@ const Carousel = memo(() => {
     const perspective = 2000
 
     return (
-        <div className="relative h-screen w-full overflow-hidden bg-gradient-to-b from-gray-50 to-gray-100">
+        <div className="relative h-screen max-md:h-[calc(100vh-40vh)] w-full overflow-hidden ">
             <div
-                className="absolute left-1/2 top-1/2"
+                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
                 style={{
                     perspective: `${perspective}px`,
                     transformStyle: "preserve-3d",
@@ -79,7 +79,7 @@ const Carousel = memo(() => {
                         return (
                             <motion.div
                                 key={`${color}-${i}`}
-                                className={`absolute ${color}`}
+                                className={`absolute ${color} rounded-2xl`}
                                 style={{
                                     width: cardWidth,
                                     height: cardHeight,
@@ -102,7 +102,7 @@ const Carousel = memo(() => {
                                     },
                                 }}
                             >
-                                <div className="relative h-full w-full rounded-xl shadow-xl">
+                                <div className="relative h-full w-full rounded-xl ">
                                     {/* Front of page */}
                                     <div className="absolute inset-0 flex items-center justify-center text-2xl font-bold text-gray-700">
                                         {i + 1}
@@ -123,7 +123,7 @@ const Carousel = memo(() => {
 
                                 {/* Book spine */}
                                 <div
-                                    className="absolute left-0 top-0 h-full w-[3px] bg-black/10"
+                                    className="absolute left-0 top-0 h-full w-[3px] "
                                     style={{
                                         transform: "translateX(-1.5px) rotateY(-90deg)",
                                         transformOrigin: "left center",
@@ -144,7 +144,7 @@ const Carousel = memo(() => {
 
 Carousel.displayName = "Carousel"
 
-export default function CarouselDemo() {
+export default function FlipBook() {
     return <Carousel />
 }
 

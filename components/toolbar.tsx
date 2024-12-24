@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/command"
 // import { ScrollArea } from "./ui/scroll-area"
 import { otherFonts, recommendedFonts } from "@/lib/constants"
-import { CheckIcon, StarOff, Circle } from "lucide-react"
+import { CheckIcon, StarOff, Circle, ArrowUpFromLine, ArrowUpToLine, ArrowDownToLine } from "lucide-react"
 import { cn } from "@/lib/utils"
 import {
   ColorProps,
@@ -346,8 +346,9 @@ export function Toolbar({
                             console.log("Show Duplicate Stroke", showDuplicateStroke);
                           }}
                         >
+                          {showDuplicateStroke ? < ArrowDownToLine className="size-4" /> : <ArrowUpToLine className="size-4" />}
                           <span className="tooltiptext">Stroke Upward</span>
-                          k
+
                         </Button>
                       </div>
 

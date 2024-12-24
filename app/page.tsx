@@ -1,15 +1,30 @@
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ShimmerButton from "@/components/ui/shimmer-button";
 import Link from "next/link";
+import FlipBook from "@/components/book-flip";
+import AnimatedGradientText from "@/components/ui/animated-gradient-text";
+import { cn } from "@/lib/utils";
 
 const Page = () => {
   return (
     <section>
       <div className="container">
         <div className="grid items-center gap-8 lg:grid-cols-2">
-          <div className="flex flex-col items-center py-32 text-center lg:mx-auto lg:items-start lg:px-0 lg:text-left">
-            <p className="">New Release</p>
+          <div className="flex flex-col items-center pt-32 pb-12 text-center lg:mx-auto lg:items-start lg:px-0 lg:text-left">
+            <div>
+              <AnimatedGradientText>
+                🎉 <hr className="mx-2 h-4 w-px shrink-0 bg-gray-300" />{" "}
+                <span
+                  className={cn(
+                    `inline animate-gradient bg-gradient-to-r from-[#ffaa40] via-[#9c40ff] to-[#ffaa40] bg-[length:var(--bg-size)_100%] bg-clip-text text-transparent`,
+                  )}
+                >
+                  Introducing V2 Beta
+                </span>
+                <ChevronRight className="ml-1 size-3 transition-transform duration-300 ease-in-out group-hover:translate-x-0.5" />
+              </AnimatedGradientText>
+            </div>
             <h1 className="my-6 text-pretty text-4xl font-bold lg:text-6xl">
               {/* TestLayr */}
               Transform Your Photos with Text Magic{" "}
@@ -57,27 +72,11 @@ const Page = () => {
                 })}
               </svg>
             </div>
-            <div className="absolute left-[8%] top-[10%] flex aspect-[5/6] w-[38%] justify-center rounded-lg  bg-accent">
-              <img
-                src="/life.png"
-                alt=""
-                className="w-full h-full object-cover"
-              />
+
+            <div className="max-md:pb-10">
+              <FlipBook />
             </div>
-            <div className="absolute right-[12%] top-[20%] flex aspect-square w-1/5 justify-center rounded-lg  bg-accent">
-              <img
-                src="/bear.png"
-                alt=""
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="absolute bottom-[24%] right-[24%] flex aspect-[5/6] w-[38%] justify-center rounded-lg  bg-accent">
-              <img
-                src="/ride.png"
-                alt=""
-                className="w-full h-full object-cover"
-              />
-            </div>
+
           </div>
         </div>
       </div>
