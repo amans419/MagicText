@@ -17,8 +17,10 @@ import "@/app/fonts.css"
 import AnimatedProgress from "@/components/animated-progrss";
 import { EmptyState } from "@/components/empty-state";
 import Authenticate from "@/components/authenticate";
+import { useRouter } from "next/navigation";
 
 const EditorPage: React.FC = () => {
+  const router = useRouter();
   const { user } = useUser();
   const { session } = useSessionContext();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -67,7 +69,8 @@ const EditorPage: React.FC = () => {
   }, [handleImageUpload]);
 
   if (!user || !session || !session.user) {
-    return <Authenticate />;
+    router.push("/register");
+    return null;
   }
 
   return (
