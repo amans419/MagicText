@@ -36,7 +36,89 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }
+
+}
+
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.tooltiptext {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .tooltiptext {
+    display: block;
+  }
+}
+
+.tooltip .tooltiptext {
+  text-align: center;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  visibility: hidden;
+  width: 120px;
+  color: #000;
+  border-radius: 6px;
+  padding: 5px 0;
+  position: absolute;
+  z-index: 1;
+  bottom: 150%;
+  left: 50%;
+  margin-left: -60px;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+}
+
+@keyframes jelly {
+
+  0%,
+  to {
+    transform: scale(1);
+  }
+
+  25% {
+    transform: scale(0.9, 1.1);
+  }
+
+  50% {
+    transform: scale(1.1, 0.9);
+  }
+
+  75% {
+    transform: scale(0.95, 1.05);
+  }
+}
+
+.hover\:animate-jelly:hover {
+  animation: jelly 0.5s;
+}
+
+.hide_scrollbar::-webkit-scrollbar {
+  display: none;
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
+}
+
+body::-webkit-scrollbar {
+  display: none;
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
 }

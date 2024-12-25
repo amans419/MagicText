@@ -57,20 +57,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
-        {fontLinks.map((font, index) => (
-          <link
-            key={index}
-            rel="preload"
-            href={font.href}
-            as="style"
-            crossOrigin="anonymous"
-          />
-        ))}
-        {fontLinks.map((font, index) => (
-          <link key={`style-${index}`} rel="stylesheet" href={font.href} />
-        ))}
-      </head>
+
       <body className={inter.className}>
         <SupabaseProvider>
           <UserProvider>
