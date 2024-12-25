@@ -1,3 +1,5 @@
+"use client";
+
 import { ArrowUpRight, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ShimmerButton from "@/components/ui/shimmer-button";
@@ -5,8 +7,26 @@ import Link from "next/link";
 import FlipBook from "@/components/book-flip";
 import AnimatedGradientText from "@/components/ui/animated-gradient-text";
 import { cn } from "@/lib/utils";
+import { useSessionContext } from "@supabase/auth-helpers-react";
+import { useUser } from "@/hooks/useUser";
+import { useRouter } from "next/navigation";
 
 const Page = () => {
+
+  const router = useRouter();
+  const { user } = useUser();
+  const { session } = useSessionContext();
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!user || !session?.user) {
+      router.push("/register");
+    } else {
+      router.push("/editor");
+    }
+  };
+
+
   return (
     <section>
       <div className="container">
@@ -36,14 +56,12 @@ const Page = () => {
               masterpiece.
             </p>
             <div className="flex w-full flex-col justify-center gap-2 sm:flex-row lg:justify-start">
-              <Link href="/editor">
-                <ShimmerButton className="shadow-2xl w-full sm:w-auto">
-                  <span className="whitespace-pre-wrap text-center text-sm font-medium leading-none tracking-tight w-full sm:w-auto text-white dark:from-white dark:to-slate-900/10 lg:text-lg flex items-center justify-center">
-                    <ArrowUpRight className="mr-2 size-5" />
-                    Create Your Design
-                  </span>
-                </ShimmerButton>
-              </Link>
+              <ShimmerButton className="shadow-2xl w-full sm:w-auto" onClick={handleClick}>
+                <span className="whitespace-pre-wrap text-center text-sm font-medium leading-none tracking-tight w-full sm:w-auto text-white dark:from-white dark:to-slate-900/10 lg:text-lg flex items-center justify-center">
+                  <ArrowUpRight className="mr-2 size-5" />
+                  Create Your Design
+                </span>
+              </ShimmerButton>
             </div>
           </div>
           <div className="relative aspect-[3/4]">
