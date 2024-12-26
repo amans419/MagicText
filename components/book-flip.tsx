@@ -3,6 +3,7 @@
 import { memo, useState } from "react"
 import { motion, useAnimation, useMotionValue } from "framer-motion"
 import serenity from '@/public/serenity.jpg';
+import Image from "next/image";
 
 
 const colors = [
@@ -110,7 +111,6 @@ const Carousel = memo(() => {
                                     zIndex,
                                     backfaceVisibility: "hidden",
 
-                                    backgroundImage: `url(${imgUrl})`,
                                     backgroundSize: "cover",
                                     backgroundPosition: "center"
 
@@ -151,15 +151,18 @@ const Carousel = memo(() => {
                                     {/* Front of page */}
 
                                     {/* Back of page */}
-                                    <div
-                                        className="absolute inset-0 flex items-center justify-center rounded-xl text-2xl font-bold text-gray-700"
-                                        style={{
-                                            transform: "rotateY(180deg)",
-                                            backfaceVisibility: "hidden",
-                                        }}
-                                    >
-                                        Back {i + 1}
-                                    </div>
+
+                                    <Image
+                                        className="rounded-xl"
+                                        src={imgUrl}
+                                        alt={`Card ${i + 1}`}
+                                        layout="fill"
+                                        objectFit="cover"
+                                        priority={i === currentPage}
+
+                                    />
+
+
                                 </div>
 
                                 {/* Book spine */}
