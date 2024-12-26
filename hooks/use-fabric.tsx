@@ -847,12 +847,19 @@ export function useFabric() {
     setUploadProgress(0);
 
 
-    try {
+  try {
 
       if (!canvas && canvasRef.current) {
         const fabricCanvas = new Canvas(canvasRef.current);
         setCanvas(fabricCanvas);
+        toast({
+          variant: "destructive",
+          title: "Connection Error",
+          description: "Refresh your page or reopen website again",
+        });
+
       }
+
 
 
       // Load original image

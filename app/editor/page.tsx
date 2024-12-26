@@ -70,7 +70,7 @@ const EditorPage: React.FC = () => {
 
   if (!user || !session || !session.user) {
     router.push("/register");
-    return null;
+    return;
   }
 
   return (

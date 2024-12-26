@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { useSessionContext } from "@supabase/auth-helpers-react";
 import { useUser } from "@/hooks/useUser";
 import { useRouter } from "next/navigation";
+import Footer from "@/components/footer";
 
 const Page = () => {
 
@@ -29,8 +30,8 @@ const Page = () => {
 
   return (
     <section>
-      <div className="container">
-        <div className="grid items-center gap-8 lg:grid-cols-2">
+      <div className="">
+        <div className="grid container items-center gap-8 lg:grid-cols-2">
           <div className="flex flex-col items-center pt-32 pb-12 text-center lg:mx-auto lg:items-start lg:px-0 lg:text-left">
             <div>
               <AnimatedGradientText>
@@ -97,6 +98,9 @@ const Page = () => {
 
           </div>
         </div>
+
+        <Footer />
+
       </div>
     </section>
   );
