@@ -98,6 +98,7 @@ const EditorPage: React.FC = () => {
         <div className={`text-center m-6  ${!isLoading && !canvasReady ? 'block' : 'hidden'}`}>
 
           <EmptyState
+            handleImageUpload={handleImageUpload}
             title="Welcome"
             description="Get started by uploading an image!"
             onFileChange={onFileChange}

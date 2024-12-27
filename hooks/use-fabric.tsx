@@ -106,6 +106,7 @@ interface ExtendedObject extends fabric.Object {
 interface ExtendedTextbox extends fabric.Textbox {
   customId?: string;
 }
+
 interface TextPair {
   original: ExtendedTextbox;
   duplicate: ExtendedTextbox;
@@ -560,9 +561,20 @@ export function useFabric() {
 
     const activeObject = canvas.getActiveObject()
     if (activeObject && activeObject.type === "textbox") {
-      const text = activeObject as fabric.Textbox
+      const text = activeObject as ExtendedTextbox;
       text.set("fontFamily", fontFamily)
 
+
+      const pair = Array.from(textPairs.values())
+        .find(p => p.original.customId === text.customId);
+
+      if (pair?.duplicate) {
+        pair.duplicate.set({
+          fontFamily: fontFamily,
+          stroke: text.fill,
+          strokeWidth: strokeSettings.width || 1.5
+        });
+      }
       // Immediately update the selected text properties
       setSelectedTextProperties((prev) => ({
         ...prev,
@@ -847,7 +859,7 @@ export function useFabric() {
     setUploadProgress(0);
 
 
-  try {
+    try {
 
       if (!canvas && canvasRef.current) {
         const fabricCanvas = new Canvas(canvasRef.current);
