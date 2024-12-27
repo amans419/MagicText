@@ -2,6 +2,7 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { LucideIcon } from "lucide-react"
+import { useDropzone } from 'react-dropzone'
 
 interface EmptyStateProps {
     title: string
@@ -13,6 +14,9 @@ interface EmptyStateProps {
     }
     className?: string
     onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    handleImageUpload: (file: File) => Promise<void>;
+
+
 }
 
 export function EmptyState({
@@ -22,6 +26,7 @@ export function EmptyState({
     action,
     className,
     onFileChange,
+    handleImageUpload,
 }: EmptyStateProps) {
 
     const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -31,13 +36,43 @@ export function EmptyState({
     };
 
 
+    const onDrop = React.useCallback(
+        async (acceptedFiles: File[]) => {
+            if (acceptedFiles.length > 0) {
+                try {
+                    const file = acceptedFiles[0];
+                    await handleImageUpload(file);
+                } catch (error) {
+                    console.error("Error uploading file:", error);
+                    alert("Failed to upload image. Please try again.");
+                }
+            }
+        },
+        [handleImageUpload]
+    );
+
+    const { getRootProps, getInputProps, isDragActive } = useDropzone({
+        onDrop,
+        accept: {
+            'image/jpeg': ['.jpeg', '.jpg'],
+            'image/png': ['.png']
+        },
+        multiple: false
+    });
+
+
     return (
-        <div className={cn(
-            "bg-background border-border hover:border-border/80 text-center",
-            "border-2 border-dashed rounded-xl p-14 w-full max-w-[620px]",
-            "group hover:bg-muted/50 transition duration-500 hover:duration-200 px-32 overflow-hidden max-md:px-12",
-            className
-        )}>
+        <div
+            {...getRootProps()}
+
+            className={cn(
+                "bg-background border-border hover:border-border/80 text-center",
+                "border-2 border-dashed rounded-xl p-14 w-full max-w-[620px]",
+                "group hover:bg-muted/50 transition duration-500 hover:duration-200 px-32 overflow-hidden max-md:px-12",
+                isDragActive && "border-primary bg-primary/5",
+                className
+            )}
+        >
             <div className="flex justify-center isolate">
                 {icons.length === 3 ? (
                     <>
@@ -72,6 +107,7 @@ export function EmptyState({
                     <input
                         type="file"
                         ref={fileInputRef}
+                        {...getInputProps()}
                         style={{ display: "none" }}
                         onChange={onFileChange}
                         accept=".jpg, .jpeg, .png"
