@@ -11,6 +11,8 @@ import { useSessionContext } from "@supabase/auth-helpers-react";
 import { useUser } from "@/hooks/useUser";
 import { useRouter } from "next/navigation";
 import Footer from "@/components/footer";
+import { Header } from "@/components/header";
+
 
 const Page = () => {
 
@@ -31,8 +33,9 @@ const Page = () => {
   return (
     <section>
       <div className="">
+        <Header />
         <div className="grid container items-center gap-8 lg:grid-cols-2">
-          <div className="flex flex-col items-center pt-32 pb-12 text-center lg:mx-auto lg:items-start lg:px-0 lg:text-left">
+          <div className="flex flex-col items-center pt-24 pb-12 text-center lg:mx-auto lg:items-start lg:px-0 lg:text-left">
             <div>
               <AnimatedGradientText>
                 🎉 <hr className="mx-2 h-4 w-px shrink-0 bg-gray-300" />{" "}
@@ -98,6 +101,8 @@ const Page = () => {
 
           </div>
         </div>
+
+
 
         <Footer />
 

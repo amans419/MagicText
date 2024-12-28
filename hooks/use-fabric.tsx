@@ -19,16 +19,18 @@ const DEFAULT_TEXT_OPTIONS = {
   strokeWidth: 1.5,
   textAlign: "center",
 }
+
 const loadingMessages = [
   { threshold: 5, message: "Initializing...", time: 0 },
-  { threshold: 15, message: "Starting background removal...", time: 2000 },
-  { threshold: 30, message: "Processing image...", time: 4000 },
-  { threshold: 45, message: "Analyzing details...", time: 6000 },
-  { threshold: 60, message: "Removing background...", time: 8000 },
-  { threshold: 75, message: "Enhancing edges...", time: 10000 },
-  { threshold: 85, message: "Almost done...", time: 12000 },
-  { threshold: 95, message: "Finalizing...", time: 14000 }
+  { threshold: 15, message: "Starting background removal...", time: 6000 },
+  { threshold: 30, message: "Processing image...", time: 8000 },
+  { threshold: 45, message: "Analyzing details...", time: 10000 },
+  { threshold: 60, message: "Removing background...", time: 12000 },
+  { threshold: 75, message: "Enhancing edges...", time: 19000 },
+  { threshold: 85, message: "Almost done...", time: 21000 },
+  { threshold: 95, message: "Finalizing...", time: 23000 }
 ];
+
 interface TextStrokeSettings {
   id: string;
   hasStroke: boolean;
@@ -383,7 +385,7 @@ export function useFabric() {
     canvas.add(text)
 
     setShowDuplicateStroke(false); // Reset duplicate stroke state
-
+    console.log('Show Duplicate Stroke:', showDuplicateStroke);
     canvas.setActiveObject(text)
     canvas.sendObjectToBack(text)
 
@@ -832,7 +834,7 @@ export function useFabric() {
           setCurrentMessage(loadingMessages[currentIndex].message);
           currentIndex++;
         }
-      }, 1000);
+      }, 100);
 
 
       await setupImage(imageUrl)

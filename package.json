@@ -39,7 +39,7 @@
     "cmdk": "1.0.0",
     "cobe": "^0.6.3",
     "fabric": "6.5.1",
-    "framer-motion": "^11.7.0",
+    "framer-motion": "^11.15.0",
     "lucide-react": "^0.439.0",
     "mini-svg-data-uri": "^1.4.4",
     "next": "14.2.8",
