@@ -26,7 +26,7 @@ export function Header({
                 <span>{description}</span>
             </div>
             <Link
-                href="https://github.com/yourusername/MagicText"
+                href="https://github.com/KrishnaCodez/MagicText"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="underline hover:text-primary transition-colors"
