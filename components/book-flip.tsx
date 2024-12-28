@@ -7,12 +7,13 @@ import Image from "next/image";
 
 
 const cardImages = [
-
     "/nostalgic.png",
+    "/drift.jpg",
     "/peace.png",
     "/dog.png",
     "/roar.jpg",
     "/speed.jpg",
+    "/serenity.jpg",
     "/grace.png",
     "/thirsty.jpg",
 
@@ -40,7 +41,7 @@ const Carousel = memo(() => {
         if (autoFlipTimeoutRef.current) {
             clearTimeout(autoFlipTimeoutRef.current)
         }
-        autoFlipTimeoutRef.current = setTimeout(flipToNextPage, 6000)
+        autoFlipTimeoutRef.current = setTimeout(flipToNextPage, 4200)
     }, [flipToNextPage])
 
     useEffect(() => {
