@@ -114,13 +114,13 @@ const Page = () => {
                   Quick Demo 🎥
                 </h1>
                 <motion.div
-                  initial={{ maxWidth: "38rem" }} // 96 in rem
-                  whileHover={{ maxWidth: "100%" }}
-                  transition={{
-                    duration: 0.5,
-                    ease: [0.32, 0.72, 0, 1],
-                    delay: 0.1,
-                  }}
+                  // initial={{ maxWidth: "38rem" }} // 96 in rem
+                  // whileHover={{ maxWidth: "100%" }}
+                  // transition={{
+                  //   duration: 0.5,
+                  //   ease: [0.32, 0.72, 0, 1],
+                  //   delay: 0.1,
+                  // }}
                   className={cn(
                     "group relative flex flex-col overflow-hidden rounded-lg w-full h-full",
                     "bg-white shadow-sm ring-1 ring-black/5",
