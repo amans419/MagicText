@@ -143,9 +143,12 @@ const Carousel = memo(() => {
                                     },
                                 }}
                             >
-                                <div className="relative h-full w-full rounded-xl flex items-center justify-center">
+                                <div className="relative h-full w-full rounded-xl flex items-center justify-center pointer-events-none select-none"
+
+                                    style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
+                                >
                                     <Image
-                                        className="rounded-xl"
+                                        className="rounded-xl pointer-events-none select-none"
                                         src={imgUrl}
                                         alt={`Card ${i + 1}`}
                                         layout="fill"
@@ -169,7 +172,7 @@ const Carousel = memo(() => {
                 </motion.div>
             </div>
 
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-sm text-gray-500">
+            <div className="absolute bottom-16 max-md:bottom-8 left-1/2 -translate-x-1/2 text-sm text-gray-500">
                 Swipe to turn pages
             </div>
         </div>
