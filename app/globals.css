@@ -122,3 +122,13 @@ body::-webkit-scrollbar {
   scrollbar-width: none;
   /* Firefox */
 }
+
+.product-hunt-badge svg {
+  color: #4C545F; 
+  transition: color 0.3s ease;
+}
+
+
+.product-hunt-badge:hover svg {
+  color: #000000;
+}

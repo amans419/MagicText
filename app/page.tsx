@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import Footer from "@/components/footer";
 import { Header } from "@/components/header";
 import { motion } from "framer-motion";
+import { Badge } from "@/components/badge";
 
 const Page = () => {
 
@@ -35,26 +36,29 @@ const Page = () => {
       <div className="flex justify-center items-center flex-col">
         <Header />
 
-        <div className="container flex flex-col items-center gap-8 pb-8">
+        <div className="container flex flex-col items-center gap-8 pb-8 max-md:pt-12">
 
           <div className="grid container items-center gap-8 lg:grid-cols-2">
             <div className="flex flex-col items-center pb-12 text-center lg:mx-auto lg:items-start lg:px-0 lg:text-left">
-              <div>
-                <AnimatedGradientText>
-                  🎉 <hr className="mx-2 h-4 w-px shrink-0 bg-gray-300" />{" "}
-                  <span
-                    className={cn(
-                      `inline animate-gradient bg-gradient-to-r from-[#ffaa40] via-[#9c40ff] to-[#ffaa40] bg-[length:var(--bg-size)_100%] bg-clip-text text-transparent`,
-                    )}
-                  >
-                    Introducing V2 Beta
-                  </span>
-                  <ChevronRight className="ml-1 size-3 transition-transform duration-300 ease-in-out group-hover:translate-x-0.5" />
-                </AnimatedGradientText>
+              <div className="flex flex-col gap-6  max-xl:items-center">
+                <Badge link="https://www.producthunt.com/posts/magic-text" />
+                <div>
+                  <AnimatedGradientText>
+                    🎉 <hr className="mx-2 h-4 w-px shrink-0 bg-gray-300" />{" "}
+                    <span
+                      className={cn(
+                        `inline animate-gradient bg-gradient-to-r from-[#ffaa40] via-[#9c40ff] to-[#ffaa40] bg-[length:var(--bg-size)_100%] bg-clip-text text-transparent`,
+                      )}
+                    >
+                      Introducing V2 Beta
+                    </span>
+                    <ChevronRight className="ml-1 size-3 transition-transform duration-300 ease-in-out group-hover:translate-x-0.5" />
+                  </AnimatedGradientText>
+                </div>
               </div>
               <h1 className="my-6 text-pretty text-4xl font-bold lg:text-6xl">
                 {/* TestLayr */}
-                Transform Your Photos with Text Magic{" "}
+                Transform Your Photos with Magic Text{" "}
                 <span className="text-3xl">✨</span>
               </h1>
               <p className="mb-8 max-w-xl text-muted-foreground lg:text-xl">
