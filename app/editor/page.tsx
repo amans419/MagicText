@@ -8,12 +8,12 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { ReloadIcon } from "@radix-ui/react-icons";
 import { Progress } from "@/components/ui/progress";
-import { BadgePlus, Files, FileText, Images, Link } from 'lucide-react';
+import { BadgePlus, Files, FileText, Images, Link } from "lucide-react";
 import { useFabric } from "@/hooks/use-fabric";
-import { Toolbar } from "@/components/toolbar"
-import ImageRender from "@/components/image-render"
+import { Toolbar } from "@/components/toolbar";
+import ImageRender from "@/components/image-render";
 
-import "@/app/fonts.css"
+import "@/app/fonts.css";
 import AnimatedProgress from "@/components/animated-progrss";
 import { EmptyState } from "@/components/empty-state";
 import Authenticate from "@/components/authenticate";
@@ -52,7 +52,7 @@ const EditorPage: React.FC = () => {
     showStrokeUI,
     setShowDuplicateStroke,
     removeStroke,
-    showDuplicateStroke
+    showDuplicateStroke,
   } = useFabric();
 
   const handleUploadImage = () => {
@@ -61,17 +61,20 @@ const EditorPage: React.FC = () => {
     }
   };
 
-  const onFileChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      handleImageUpload(file);
-    }
-  }, [handleImageUpload]);
+  const onFileChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      if (file) {
+        handleImageUpload(file);
+      }
+    },
+    [handleImageUpload]
+  );
 
-  if (!user || !session || !session.user) {
-    router.push("/register");
-    return;
-  }
+  // if (!user || !session || !session.user) {
+  //   router.push("/register");
+  //   return;
+  // }
 
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)]">
@@ -95,8 +98,9 @@ const EditorPage: React.FC = () => {
       <Separator />
 
       <div className="flex-grow flex items-center justify-center">
-        <div className={`text-center m-6  ${!isLoading && !canvasReady ? 'block' : 'hidden'}`}>
-
+        <div
+          className={`text-center m-6  ${!isLoading && !canvasReady ? "block" : "hidden"}`}
+        >
           <EmptyState
             handleImageUpload={handleImageUpload}
             title="Welcome"
@@ -105,21 +109,26 @@ const EditorPage: React.FC = () => {
             icons={[FileText, Images, Files]}
             action={{
               label: "Upload Image",
-              onClick: () => { handleUploadImage }
+              onClick: () => {
+                handleUploadImage;
+              },
             }}
           />
         </div>
         {/* Upload button */}
 
-
         {/* Progress */}
-        <div className={`${isLoading ? 'flex' : 'hidden'} flex-col items-center justify-center`}>
-
-          <AnimatedProgress uploadProgress={uploadProgress} currentMessage={currentMessage} />
+        <div
+          className={`${isLoading ? "flex" : "hidden"} flex-col items-center justify-center`}
+        >
+          <AnimatedProgress
+            uploadProgress={uploadProgress}
+            currentMessage={currentMessage}
+          />
         </div>
 
         {/* Canvas */}
-        <div className={`w-full h-full ${canvasReady ? 'block' : 'hidden'}`}>
+        <div className={`w-full h-full ${canvasReady ? "block" : "hidden"}`}>
           <ImageRender
             canvasRef={canvasRef}
             canvasReady={canvasReady}
@@ -158,4 +167,3 @@ const EditorPage: React.FC = () => {
 };
 
 export default EditorPage;
-

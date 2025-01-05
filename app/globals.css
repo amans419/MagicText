@@ -40,9 +40,7 @@
   body {
     @apply bg-background text-foreground;
   }
-
 }
-
 
 .no-scrollbar {
   -ms-overflow-style: none;
@@ -77,6 +75,8 @@
   bottom: 150%;
   left: 50%;
   margin-left: -60px;
+  background: rgba(255, 255, 255, 0.562);
+  backdrop-filter: blur(10px);
 }
 
 .tooltip:hover .tooltiptext {
@@ -84,7 +84,6 @@
 }
 
 @keyframes jelly {
-
   0%,
   to {
     transform: scale(1);
@@ -124,10 +123,9 @@ body::-webkit-scrollbar {
 }
 
 .product-hunt-badge svg {
-  color: #4C545F; 
+  color: #4c545f;
   transition: color 0.3s ease;
 }
-
 
 .product-hunt-badge:hover svg {
   color: #000000;
