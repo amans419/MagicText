@@ -71,10 +71,10 @@ const EditorPage: React.FC = () => {
     [handleImageUpload]
   );
 
-  // if (!user || !session || !session.user) {
-  //   router.push("/register");
-  //   return;
-  // }
+  if (!user || !session || !session.user) {
+    router.push("/register");
+    return;
+  }
 
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)]">
