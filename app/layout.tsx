@@ -12,34 +12,35 @@ import Head from 'next/head';
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://magictext.tech"),
+  metadataBase: new URL("https://textbehindimage.tech"),
 
   title:
-    "MagicText - Create Text Behind Image Effects Online | Free Design Tool",
+    "Text Behind Image Generator - Free Online Tool for Stunning Text Effects",
   description:
-    "Create stunning text behind image designs in seconds. Free online tool to make text overlay effects, photo text designs, and text-behind-image compositions. No design skills needed.",
+    "Easily create text behind image effects online. Free tool for adding stylish text overlays, transparent text effects, and layered typography on images. No design skills needed.",
   keywords:
-    "text behind image, text behind image maker, text behind image generator, text behind photo editor, image text overlay, text overlay maker, text overlay generator, photo text effects, text effect maker, text behind picture, text overlay design tool, free text behind image, online text behind image, image text design, text background remover, text overlay online, text behind image online editor, free text overlay maker, text behind image effects, image text layer editor, text image editor, photo text overlay, text behind photo maker, free text effects, online text editor with images, text overlay app, image text generator, text behind photo online, text overlay photo editor, text behind image free tool",
+    "text behind image, text effect generator, image text editor, text overlay tool, text on image maker, free text effects, online text editor, photo text design, typography effects, transparent text editor, overlay text online, text layering tool, creative text effects, image typography maker, stylish text on photo, text blending editor, background text remover, online text design, text under image effect, text photo editor, graphic text maker, free online text effects, layered text designs, text masking tool, text image composition, artistic text overlays",
   openGraph: {
-    title: "MagicText - Create Text Behind Image Effects Online",
+    title: "Text Behind Image Generator - Free Online Tool for Stunning Text Effects",
     description:
-      "Create stunning text behind image designs instantly. Free online tool for text overlay effects.",
+      "Easily create stylish text behind image effects online. Free text overlay and typography tool.",
     type: "website",
-    siteName: "MagicText",
-    url: "https://magictext.tech",
+    siteName: "Text Behind Image",
+    url: "https://textbehindimage.tech",
     images: [
       {
-        url: "/pov.png",
+        url: "/dog.png",
         width: 1200,
         height: 630,
-        alt: "MagicText - Text Behind Image Editor",
+        alt: "Text Behind Image - Free Online Text Editor",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "MagicText - Text Behind Image Editor",
-    description: "Create stunning text behind image designs instantly",
+    title: "Text Behind Image - Free Online Text Editor",
+    description:
+      "Create stunning text effects with text behind image layers. No design skills needed.",
   },
   robots: {
     index: true,
@@ -51,6 +52,7 @@ export const metadata: Metadata = {
   },
 };
 
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -58,9 +60,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <Head>
-<meta name="google-site-verification" content="PtREuswKzpLs4lN3-2iYjMJnuGMM4lkYqFPTQVCCA9g" />
-      </Head>
+      <head>
+      <meta name="google-site-verification" content="PtREuswKzpLs4lN3-2iYjMJnuGMM4lkYqFPTQVCCA9g" />
+      </head>
 
       <body className={inter.className}>
         <SupabaseProvider>
