@@ -7,6 +7,7 @@ import SupabaseProvider from "@/providers/SupabaseProvider";
 import UserProvider from "@/providers/UserProvider";
 import { Toaster } from "@/components/ui/toaster";
 import { fontLinks } from "@/utils/preLoadFonts";
+import Head from 'next/head';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -57,6 +58,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <Head>
+      <meta name="google-site-verification" content="PtREuswKzpLs4lN3-2iYjMJnuGMM4lkYqFPTQVCCA9g" />
+      </Head>
 
       <body className={inter.className}>
         <SupabaseProvider>
