@@ -12,10 +12,10 @@ import Head from 'next/head';
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://textbehindimages.vercel.app"),
+  metadataBase: new URL("https://textbehindimages.vercel.app/"),
 
   title:
-    "Text Behind Image Generator - Free Online Tool for Stunning Text Effects",
+    "Text Behind Image - Free Online Tool for add text behind photo Effects",
   description:
     "Easily create text behind image effects online. Free tool for adding stylish text overlays, transparent text effects, and layered typography on images. No design skills needed.",
   keywords:
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
       "Easily create stylish text behind image effects online. Free text overlay and typography tool.",
     type: "website",
     siteName: "Text Behind Image",
-    url: "https://textbehindimages.vercel.app",
+    url: "https://textbehindimages.vercel.app/",
     images: [
       {
         url: "/dog.png",
@@ -64,9 +64,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
-      <meta name="google-site-verification" content="PtREuswKzpLs4lN3-2iYjMJnuGMM4lkYqFPTQVCCA9g" />
-      </head>
 
       <body className={inter.className}>
         <SupabaseProvider>
