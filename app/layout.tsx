@@ -15,13 +15,13 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://textbehindimages.vercel.app/"),
 
   title:
-    "Text Behind Image - Free Online Tool for add text behind photo Effects",
+    "Text Behind Image - Free Online Tool to add text behind photo Effects",
   description:
     "Easily create text behind image effects online. Free tool for adding stylish text overlays, transparent text effects, and layered typography on images. No design skills needed.",
   keywords:
     "text behind image, text effect generator, image text editor, text overlay tool, text on image maker, free text effects, online text editor, photo text design, typography effects, transparent text editor, overlay text online, text layering tool, creative text effects, image typography maker, stylish text on photo, text blending editor, background text remover, online text design, text under image effect, text photo editor, graphic text maker, free online text effects, layered text designs, text masking tool, text image composition, artistic text overlays",
   openGraph: {
-    title: "Text Behind Image Generator - Free Online Tool for Stunning Text Effects",
+    title: "Text Behind Image - Free Online Tool to add text behind photo",
     description:
       "Easily create stylish text behind image effects online. Free text overlay and typography tool.",
     type: "website",
