@@ -12,7 +12,7 @@ import Head from 'next/head';
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://textbehindimage.tech"),
+  metadataBase: new URL("https://textbehindimages.vercel.app"),
 
   title:
     "Text Behind Image Generator - Free Online Tool for Stunning Text Effects",
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
       "Easily create stylish text behind image effects online. Free text overlay and typography tool.",
     type: "website",
     siteName: "Text Behind Image",
-    url: "https://textbehindimage.tech",
+    url: "https://textbehindimages.vercel.app",
     images: [
       {
         url: "/dog.png",
